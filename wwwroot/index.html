@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RSS Reader</title>
+  <style>
+    /* ── Google Fonts ── */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    /* ── CSS Variables (design tokens) ── */
+    :root {
+      --ink:        #1c1c1e;
+      --paper:      #f7f5f0;
+      --sidebar-bg: #1c1c1e;
+      --rule:       #d4cfc6;
+      --accent:     #2563eb;
+      --accent-dim: #1d4ed8;
+      --purple:     #7c3aed;
+      --muted:      #6b7280;
+      --danger:     #dc2626;
+      --success:    #16a34a;
+      --white:      #ffffff;
+      --sidebar-border: #2a2a2e;
+      --sidebar-hover:  #2a2a2e;
+      --input-bg:   #2a2a2e;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ════════════════════════════════════════
+       TOP BAR
+    ════════════════════════════════════════ */
+    .topbar {
+      background: var(--ink);
+      height: 48px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      border-bottom: 3px solid var(--accent);
+      z-index: 20;
+    }
+
+    .topbar-logo {
+      width: 260px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px;
+      background: #111;
+      border-right: 1px solid #2a2a2e;
+      height: 100%;
+    }
+    .topbar-logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      flex: 1;
+    }
+    .topbar-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: #6b7280;
+      letter-spacing: 0.06em;
+    }
+    .topbar-stats {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: #6b7280;
+    }
+    .topbar-stats span { color: var(--accent); font-weight: 600; }
+
+    /* ════════════════════════════════════════
+       LAYOUT
+    ════════════════════════════════════════ */
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ════════════════════════════════════════
+       SIDEBAR
+    ════════════════════════════════════════ */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      border-right: 1px solid var(--sidebar-border);
+    }
+
+    .sidebar-section {
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--sidebar-border);
+    }
+
+    .sidebar-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #4b5563;
+      margin-bottom: 12px;
+    }
+
+    /* ── Add Feed ── */
+    .add-feed-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .add-feed-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid #3a3a3e;
+      border-radius: 5px;
+      padding: 9px 11px;
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .add-feed-input::placeholder { color: #4b5563; }
+    .add-feed-input:focus { border-color: var(--accent); }
+
+    .btn-subscribe {
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 9px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .btn-subscribe:hover { background: var(--accent-dim); }
+    .btn-subscribe:disabled { background: #374151; color: #6b7280; cursor: not-allowed; }
+
+    /* Status message under the subscribe button */
+    .add-status {
+      font-size: 0.73rem;
+      min-height: 1.1em;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.4;
+    }
+    .add-status.error   { color: #f87171; }
+    .add-status.success { color: #4ade80; }
+    .add-status.loading { color: #9ca3af; }
+
+    /* ── Feed List ── */
+    .feeds-section { flex: 1; padding: 18px 16px; }
+
+    .feed-item {
+      border-radius: 6px;
+      padding: 10px 10px 8px;
+      margin-bottom: 6px;
+      cursor: default;
+      transition: background 0.1s;
+      border-left: 3px solid transparent;
+    }
+    .feed-item:hover { background: var(--sidebar-hover); }
+
+    .feed-item-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+    .feed-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .feed-name {
+      font-size: 0.82rem;
+      color: #d1d5db;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .feed-badge {
+      background: #374151;
+      color: #9ca3af;
+      border-radius: 10px;
+      padding: 1px 7px;
+      font-size: 0.6rem;
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+    }
+
+    .feed-actions {
+      display: flex;
+      gap: 5px;
+      padding-left: 16px;
+    }
+    .feed-btn {
+      font-size: 0.67rem;
+      background: none;
+      border: 1px solid #3a3a3e;
+      border-radius: 3px;
+      padding: 3px 7px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .feed-btn.refresh { color: #9ca3af; }
+    .feed-btn.refresh:hover { color: var(--accent); border-color: var(--accent); }
+    .feed-btn.remove  { color: #6b7280; }
+    .feed-btn.remove:hover  { color: #f87171; border-color: #f87171; }
+    .feed-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .feed-last-refreshed {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.58rem;
+      color: #374151;
+      padding-left: 16px;
+      margin-top: 4px;
+    }
+
+    .no-feeds-msg {
+      font-size: 0.8rem;
+      color: #374151;
+      font-style: italic;
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    /* ════════════════════════════════════════
+       MAIN CONTENT
+    ════════════════════════════════════════ */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .main-header {
+      padding: 18px 40px 14px;
+      border-bottom: 2px solid var(--ink);
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-shrink: 0;
+      background: var(--paper);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .main-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .main-subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .articles-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 40px 40px;
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 80px 0;
+      color: var(--muted);
+    }
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 14px; }
+    .empty-state-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .empty-state-msg { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── Featured Article (newest) ── */
+    .article-featured {
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 8px;
+      padding: 22px 24px;
+      margin: 20px 0 4px;
+    }
+    .featured-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: var(--purple);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    /* ── Regular Article ── */
+    .article {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: start;
+    }
+    .article:last-child { border-bottom: none; }
+
+    .article-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 6px;
+    }
+    .eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .eyebrow-source {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.67rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .eyebrow-sep { color: var(--rule); }
+    .eyebrow-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.67rem;
+      color: var(--muted);
+    }
+
+    .article-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.35;
+      margin-bottom: 7px;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+    }
+    .article-title:hover { color: var(--accent); }
+
+    .article-desc {
+      font-size: 0.85rem;
+      color: #4b5563;
+      line-height: 1.7;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .article-featured .article-desc { -webkit-line-clamp: 3; }
+
+    .article-read-link {
+      font-size: 0.72rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 2px;
+    }
+    .article-read-link:hover { text-decoration: underline; }
+
+    /* ── Loading spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #d1d5db;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast Notification ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--ink);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      z-index: 1000;
+      max-width: 320px;
+      border-left: 4px solid var(--accent);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.success { border-left-color: var(--success); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 680px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; max-height: 45vh; }
+      .articles-scroll { padding: 0 16px 24px; }
+      .main-header { padding: 14px 16px 12px; }
+      .article { grid-template-columns: 1fr; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ TOP BAR ════════════════ -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <span>📰</span>
+    <span class="topbar-logo-text">RSS Reader</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-tag">Personal Feed Aggregator</span>
+    <span class="topbar-stats" id="topbarStats"></span>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- ════════════════ SIDEBAR ════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Add Feed Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Add Feed</div>
+      <div class="add-feed-box">
+        <input
+          class="add-feed-input"
+          id="feedUrlInput"
+          type="text"
+          placeholder="https://feeds.bbci.co.uk/news/rss.xml"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="btn-subscribe" id="subscribeBtn" onclick="addFeed()">
+          Subscribe
+        </button>
+        <div class="add-status" id="addStatus"></div>
+      </div>
+    </div>
+
+    <!-- Feed List Section -->
+    <div class="feeds-section">
+      <div class="sidebar-label">Your Feeds</div>
+      <div id="feedList">
+        <p class="no-feeds-msg">No feeds yet.<br/>Add one above to get started.</p>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ════════════════ MAIN ════════════════ -->
+  <main class="main">
+    <div class="main-header">
+      <span class="main-title">All Articles</span>
+      <span class="main-subtitle">newest first · river of news</span>
+    </div>
+
+    <div class="articles-scroll" id="articlesContainer">
+      <!-- Articles are injected here by JavaScript -->
+      <div class="empty-state">
+        <div class="empty-state-icon">🗞️</div>
+        <div class="empty-state-title">Nothing to read yet</div>
+        <p class="empty-state-msg">Subscribe to an RSS feed using the sidebar on the left.</p>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT
+     This is all the logic that runs in the browser.
+     It talks to the C# backend via fetch() calls.
+════════════════════════════════════════════ -->
+<script>
+  // ── Config ──────────────────────────────────────────────────
+  // Empty string = same origin (backend serves the frontend).
+  // If you run frontend separately, set this to "http://localhost:5000"
+  const API_BASE = '';
+
+  // Colour palette for feed dots (cycles through these)
+  const DOT_COLORS = [
+    '#2563eb', '#7c3aed', '#db2777', '#d97706',
+    '#059669', '#0891b2', '#dc2626', '#65a30d'
+  ];
+
+  // We keep a local copy of feeds in memory so we can look up
+  // feed colors without hitting the server every time
+  let feedsCache = [];
+
+  // ── Startup ─────────────────────────────────────────────────
+  // When the page finishes loading, fetch feeds and articles
+  window.addEventListener('DOMContentLoaded', async () => {
+    await loadFeeds();
+    await loadArticles();
+
+    // Allow pressing Enter in the input box to subscribe
+    document.getElementById('feedUrlInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addFeed();
+    });
+  });
+
+  // ── ADD FEED ────────────────────────────────────────────────
+  async function addFeed() {
+    const input  = document.getElementById('feedUrlInput');
+    const btn    = document.getElementById('subscribeBtn');
+    const status = document.getElementById('addStatus');
+
+    const url = input.value.trim();
+    if (!url) {
+      setStatus(status, 'Please paste a feed URL first.', 'error');
+      return;
+    }
+
+    // Show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Validating…';
+    setStatus(status, 'Checking feed…', 'loading');
+
+    try {
+      const res = await fetch(`${API_BASE}/api/feeds`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        input.value = '';
+        setStatus(status, '', '');
+        showToast(`✓ Subscribed to "${data.title}"`, 'success');
+        await loadFeeds();
+        await loadArticles();
+      } else {
+        // Show the error message from the backend
+        setStatus(status, data.error || 'Failed to add feed.', 'error');
+      }
+    } catch (err) {
+      setStatus(status, 'Network error — is the server running?', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Subscribe';
+    }
+  }
+
+  // ── LOAD FEEDS ──────────────────────────────────────────────
+  async function loadFeeds() {
+    const container = document.getElementById('feedList');
+
+    try {
+      const res   = await fetch(`${API_BASE}/api/feeds`);
+      const feeds = await res.json();
+      feedsCache  = feeds;
+
+      updateTopbarStats(feeds);
+
+      if (feeds.length === 0) {
+        container.innerHTML = '<p class="no-feeds-msg">No feeds yet.<br/>Add one above to get started.</p>';
+        return;
+      }
+
+      container.innerHTML = feeds.map((feed, i) => {
+        const color       = DOT_COLORS[i % DOT_COLORS.length];
+        const lastRefresh = feed.lastRefreshed
+          ? `Refreshed ${timeAgo(feed.lastRefreshed)}`
+          : 'Never refreshed';
+
+        return `
+          <div class="feed-item" id="feed-${feed.id}">
+            <div class="feed-item-top">
+              <div class="feed-dot" style="background:${color}"></div>
+              <span class="feed-name" title="${escHtml(feed.url)}">${escHtml(feed.title)}</span>
+            </div>
+            <div class="feed-actions">
+              <button class="feed-btn refresh" id="refresh-btn-${feed.id}"
+                onclick="refreshFeed('${feed.id}', this)">↻ Refresh</button>
+              <button class="feed-btn remove"
+                onclick="removeFeed('${feed.id}', '${escHtml(feed.title).replace(/'/g,"\\'")}')">✕ Remove</button>
+            </div>
+            <div class="feed-last-refreshed">${lastRefresh}</div>
+          </div>
+        `;
+      }).join('');
+
+    } catch (err) {
+      container.innerHTML = '<p class="no-feeds-msg" style="color:#f87171;">Could not load feeds.</p>';
+    }
+  }
+
+  // ── REMOVE FEED ─────────────────────────────────────────────
+  async function removeFeed(id, title) {
+    if (!confirm(`Remove "${title}" and all its articles?`)) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/feeds/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+
+      if (res.ok) {
+        showToast(`✓ ${data.message}`, 'success');
+        await loadFeeds();
+        await loadArticles();
+      } else {
+        showToast(data.error || 'Failed to remove feed.', 'error');
+      }
+    } catch {
+      showToast('Network error.', 'error');
+    }
+  }
+
+  // ── REFRESH FEED ─────────────────────────────────────────────
+  async function refreshFeed(id, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+
+    try {
+      const res  = await fetch(`${API_BASE}/api/feeds/${id}/refresh`, { method: 'POST' });
+      const data = await res.json();
+
+      if (res.ok) {
+        showToast(`✓ ${data.message}`, 'success');
+        await loadFeeds();
+        await loadArticles();
+      } else {
+        showToast(data.error || 'Refresh failed.', 'error');
+      }
+    } catch {
+      showToast('Network error.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '↻ Refresh';
+    }
+  }
+
+  // ── LOAD ARTICLES ───────────────────────────────────────────
+  async function loadArticles() {
+    const container = document.getElementById('articlesContainer');
+
+    try {
+      const res      = await fetch(`${API_BASE}/api/articles`);
+      const articles = await res.json();
+
+      if (articles.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🗞️</div>
+            <div class="empty-state-title">Nothing to read yet</div>
+            <p class="empty-state-msg">Subscribe to an RSS feed using the sidebar on the left.</p>
+          </div>`;
+        return;
+      }
+
+      // Build article HTML — first article gets the "featured" treatment
+      const html = articles.map((article, index) => {
+        const color = getFeedColor(article.feedId);
+        const date  = formatDate(article.publishedAt);
+
+        if (index === 0) {
+          // ── Featured (newest) article ──
+          return `
+            <div class="article-featured">
+              <span class="featured-tag">⚡ Latest</span>
+              <div class="article-eyebrow">
+                <div class="eyebrow-dot" style="background:${color}"></div>
+                <span class="eyebrow-source">${escHtml(article.feedTitle)}</span>
+                <span class="eyebrow-sep">·</span>
+                <span class="eyebrow-date">${date}</span>
+              </div>
+              <a class="article-title" href="${escHtml(article.url)}" target="_blank" rel="noopener noreferrer">
+                ${escHtml(article.title)}
+              </a>
+              <p class="article-desc">${escHtml(article.description)}</p>
+            </div>`;
+        }
+
+        // ── Regular article ──
+        return `
+          <div class="article">
+            <div>
+              <div class="article-eyebrow">
+                <div class="eyebrow-dot" style="background:${color}"></div>
+                <span class="eyebrow-source">${escHtml(article.feedTitle)}</span>
+                <span class="eyebrow-sep">·</span>
+                <span class="eyebrow-date">${date}</span>
+              </div>
+              <a class="article-title" href="${escHtml(article.url)}" target="_blank" rel="noopener noreferrer">
+                ${escHtml(article.title)}
+              </a>
+              <p class="article-desc">${escHtml(article.description)}</p>
+            </div>
+            <div>
+              <a class="article-read-link" href="${escHtml(article.url)}" target="_blank" rel="noopener noreferrer">
+                Read →
+              </a>
+            </div>
+          </div>`;
+      }).join('');
+
+      container.innerHTML = html;
+
+    } catch (err) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">⚠️</div>
+          <div class="empty-state-title">Could not load articles</div>
+          <p class="empty-state-msg">Make sure the server is running.</p>
+        </div>`;
+    }
+  }
+
+  // ── HELPERS ─────────────────────────────────────────────────
+
+  // Get a feed's assigned color by its ID
+  function getFeedColor(feedId) {
+    const idx = feedsCache.findIndex(f => f.id === feedId);
+    return idx === -1 ? '#6b7280' : DOT_COLORS[idx % DOT_COLORS.length];
+  }
+
+  // Update the top bar stats ("12 articles · 3 feeds")
+  function updateTopbarStats(feeds) {
+    const statsEl = document.getElementById('topbarStats');
+    if (feeds.length === 0) { statsEl.textContent = ''; return; }
+    // We'll update article count after articles load
+    statsEl.innerHTML = `<span>${feeds.length}</span> feed${feeds.length !== 1 ? 's' : ''}`;
+  }
+
+  // Format a date string into a readable label
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d   = new Date(dateStr);
+    const now = new Date();
+    const diffMs  = now - d;
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHr  = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
+
+    if (diffMin < 1)   return 'Just now';
+    if (diffMin < 60)  return `${diffMin}m ago`;
+    if (diffHr  < 24)  return `${diffHr}h ago`;
+    if (diffDay < 7)   return `${diffDay}d ago`;
+
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  // "3 hours ago", "2 days ago" etc. for sidebar last-refresh label
+  function timeAgo(dateStr) {
+    return formatDate(dateStr);
+  }
+
+  // Set a status message with a style class
+  function setStatus(el, msg, type) {
+    el.textContent  = msg;
+    el.className    = `add-status ${type}`;
+  }
+
+  // Show a temporary toast notification at the bottom right
+  let toastTimer;
+  function showToast(msg, type = '') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className   = `toast ${type} show`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.className = `toast ${type}`; }, 3500);
+  }
+
+  // Escape special HTML characters to prevent XSS
+  // Even though the backend strips tags, we also escape in JS as a second layer
+  function escHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+</script>
+
+</body>
+</html>

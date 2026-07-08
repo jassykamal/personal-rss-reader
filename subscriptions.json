@@ -1,0 +1,533 @@
+{
+  "Feeds": [
+    {
+      "Id": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "Url": "http://feeds.bbci.co.uk/news/rss.xml",
+      "Title": "BBC News",
+      "AddedAt": "2026-07-08T01:14:53.5239165Z",
+      "LastRefreshed": "2026-07-08T01:14:53.7327843Z"
+    },
+    {
+      "Id": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "Url": "https://techcrunch.com/feed/",
+      "Title": "TechCrunch",
+      "AddedAt": "2026-07-08T01:15:18.7212307Z",
+      "LastRefreshed": "2026-07-08T01:15:18.8245229Z"
+    }
+  ],
+  "Articles": [
+    {
+      "Id": "c7b8cd55-54c2-43ef-9c4f-35ad875d9286",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Farage\u0027s rivals rule out standing in Clacton by-election ",
+      "Url": "https://www.bbc.co.uk/news/articles/cjdg4y3g0z7o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "The Reform UK leader says he wants an \u0022establishment versus the people by-election\u0022 but Labour calls it a \u0022circus\u0022.",
+      "PublishedAt": "2026-07-07T23:04:42Z"
+    },
+    {
+      "Id": "94225124-91df-4c39-bf96-9bb4d8f75403",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Chris Mason: Farage attempts to seize back the agenda",
+      "Url": "https://www.bbc.co.uk/news/articles/c1my1g29gk7o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "His aim throughout the forthcoming campaign is to clearly frame this by-election as \u0022the people versus the establishment\u0022.",
+      "PublishedAt": "2026-07-07T22:22:27Z"
+    },
+    {
+      "Id": "9efc4bf8-09eb-40fa-8743-2f4893744470",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "US launches strikes on Iran after tankers hit in Strait of Hormuz",
+      "Url": "https://www.bbc.co.uk/news/articles/cwykq59jwpvo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "The US says the strikes are intended to impose \u0022heavy costs\u0022, while Iran warns it will \u0022take decisive measures\u0022 in response.",
+      "PublishedAt": "2026-07-07T23:53:45Z"
+    },
+    {
+      "Id": "e2a37b2c-272c-4db9-b1ff-eb9042700fd4",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Amber heat-health alerts in effect as UK set for one of longest-lasting heatwaves since 1976",
+      "Url": "https://www.bbc.co.uk/weather/articles/cwy0jpez1nqo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Temperatures are set to rise as high as 36C (97F) for parts of southern England this week.",
+      "PublishedAt": "2026-07-07T23:10:07Z"
+    },
+    {
+      "Id": "c9afd56f-8e7a-44ec-8c62-4ba90eae6038",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "\u0027Extreme\u0027 marine heatwave expected for parts of UK",
+      "Url": "https://www.bbc.co.uk/news/articles/ckg888vpz4do?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Scientists fear that high sea temperatures could have wide-ranging consequences for marine life.",
+      "PublishedAt": "2026-07-07T23:45:07Z"
+    },
+    {
+      "Id": "610e356b-1b92-4c5f-98d2-942233bc5edd",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Why replacing leasehold may be easier said than done",
+      "Url": "https://www.bbc.co.uk/news/articles/cp8llpp67l1o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "The government wants to abolish leasehold, but replacing it could prove far more complicated",
+      "PublishedAt": "2026-07-07T23:13:38Z"
+    },
+    {
+      "Id": "ca34b73f-0796-4ab5-8e75-8fe22b850ef8",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Egypt fume at \u0027injustice\u0027 and make Messi favouritism claims after exit",
+      "Url": "https://www.bbc.co.uk/sport/football/articles/c5yzd23jll5o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "BBC Sport unpicks a game that will go down in World Cup history for featuring a team who were two goals down so late on, but who went on to win without needing extra time.",
+      "PublishedAt": "2026-07-07T21:33:21Z"
+    },
+    {
+      "Id": "94febcac-f045-414f-b3f5-199cccc48dab",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Package holidays to Dubai and Egypt cheaper as European prices creep up",
+      "Url": "https://www.bbc.co.uk/news/articles/c17y81vnje5o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Family deals to many non-European destinations are cheaper this summer than last, as travel nerves have slowed bookings.",
+      "PublishedAt": "2026-07-07T23:34:45Z"
+    },
+    {
+      "Id": "7211a196-c9e4-4b67-8c4f-15ff5a210c5e",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "\u0027It is not normal\u0027 - but extraordinary Djokovic defies odds once again",
+      "Url": "https://www.bbc.co.uk/sport/tennis/articles/cy8wev0p0wno?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "It is worth remembering that what you are watching is not normal - but Novak Djokovic is anything but ordinary in another thrilling Wimbledon match.",
+      "PublishedAt": "2026-07-07T23:46:39Z"
+    },
+    {
+      "Id": "c1f062e9-cc8b-419f-8856-38d3a0efecf7",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Watch: Buckling support beams seen inside New York high-rise",
+      "Url": "https://www.bbc.co.uk/news/videos/c7vygmmdyr8o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "The structure, which is under construction, was evacuated along with surrounding buildings after reports of falling bricks.",
+      "PublishedAt": "2026-07-08T00:11:48Z"
+    },
+    {
+      "Id": "b4a0afab-e9cc-4c09-8235-1fcfe8cd6767",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Hundreds of jobs at risk as John Lewis plans to cut some services",
+      "Url": "https://www.bbc.co.uk/news/articles/c30y4vqq4p6o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "No final decision has been made but the job cuts will happen in the autumn if the redundancy plans are approved.",
+      "PublishedAt": "2026-07-08T01:04:44Z"
+    },
+    {
+      "Id": "2ed6a909-6e0e-4800-851b-aac07060f394",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Trump looms large as Nato grapples with challenge of rearming Europe",
+      "Url": "https://www.bbc.co.uk/news/articles/ckg06d3dgnlo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "The US president\u0027s inflammatory words have punctuated the image of unity at this crucial gathering, Security Correspondent Frank Gardner writes.",
+      "PublishedAt": "2026-07-07T18:56:19Z"
+    },
+    {
+      "Id": "a256adc6-5347-41dc-8217-204efc73b3cb",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Tears of relief? Messi adds another incredible chapter to World Cup career",
+      "Url": "https://www.bbc.co.uk/sport/football/articles/cz6v407y3qjo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Argentina great Lionel Messi sheds tears as they fight back to beat Egypt and reach the World Cup quarter-finals.",
+      "PublishedAt": "2026-07-07T20:28:19Z"
+    },
+    {
+      "Id": "5483e1dd-55b7-4a8e-9325-e4bb6adf9753",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "England players to be told not to jump hoardings",
+      "Url": "https://www.bbc.co.uk/sport/football/articles/czx5qev7nqno?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "England players will be advised not to jump over advertising hoardings after Jordan Henderson suffered a freak injury.",
+      "PublishedAt": "2026-07-07T17:49:34Z"
+    },
+    {
+      "Id": "90b98682-617f-4e5a-8b82-e1c6b779b60f",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Fifa investigating alleged racist abuse of IShowSpeed",
+      "Url": "https://www.bbc.co.uk/sport/football/articles/c1my1pr18jmo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Fifa has opened an investigation following allegations of racist abuse involving American social media influencer IShowSpeed and a supporter during Argentina\u0027s 3-2 win over Cape Verde on Friday.",
+      "PublishedAt": "2026-07-07T19:13:36Z"
+    },
+    {
+      "Id": "c8addf76-2631-4494-a86c-d73a85eb3c69",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Can Scotland learn from history-making Norway?",
+      "Url": "https://www.bbc.co.uk/sport/football/articles/cr7xk8r9xl4o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Norway, a nation of a similar size to Scotland, are through to the World Cup quarter-finals, so can lessons be learned from their neighbours from across the North Sea?",
+      "PublishedAt": "2026-07-07T15:54:46Z"
+    },
+    {
+      "Id": "790c939b-d66e-4613-b548-1a747fc765a5",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Harry\u0027s bad news lands at wrong time, but prince sticks to script",
+      "Url": "https://www.bbc.co.uk/news/articles/ckg5v6n29g6o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "The Duke of Sussex has returned to the UK, but his first day of engagements was overshadowed by his defeat in court.",
+      "PublishedAt": "2026-07-07T19:42:43Z"
+    },
+    {
+      "Id": "c42dafb9-1067-44d1-9e49-cdfcdf65fc4c",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Watch: Clacton\u0027s mixed views on Farage\u0027s resignation",
+      "Url": "https://www.bbc.co.uk/news/videos/c3wy0d3v9epo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Nigel Farage announced he is resigning as an MP, triggering a by-election he will stand in.",
+      "PublishedAt": "2026-07-07T16:28:50Z"
+    },
+    {
+      "Id": "df711472-b9a7-41a6-a36d-69249d4cd8e5",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "The Papers: \u0027Let the people judge\u0027 and \u0027Farage gamble turns to farce\u0027",
+      "Url": "https://www.bbc.co.uk/news/articles/c1ky1wxg98ko?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Nigel Farage\u0027s announcement he was resigning as an MP to trigger a by-election is the lead of many of Wednesday\u0027s papers.",
+      "PublishedAt": "2026-07-08T00:11:22Z"
+    },
+    {
+      "Id": "368b7c49-6019-466f-bad7-11205cfde3ee",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Presidency bid while continuing court fight a gamble for Le Pen",
+      "Url": "https://www.bbc.co.uk/news/articles/cevlm2rlgwmo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Hard-right leader Marine Le Pen is appealing her case to France\u0027s top civil court, but it could backfire.",
+      "PublishedAt": "2026-07-07T20:13:13Z"
+    },
+    {
+      "Id": "4fc6b102-0c1a-4563-a3a6-6f5832e39917",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Alan Carr is keeping one unwanted item from his castle auction \u2013 see what was sold",
+      "Url": "https://www.bbc.co.uk/news/articles/c4gyy4p0x3no?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "A concrete cow was the only one of the hundreds of items from Ayton Castle that failed to find a buyer.",
+      "PublishedAt": "2026-07-07T10:35:29Z"
+    },
+    {
+      "Id": "b1174374-0314-412b-b617-0fd5b6ea50a7",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Reform asks NCA to investigate leaks of private financial information",
+      "Url": "https://www.bbc.co.uk/news/articles/c621q06w91ro?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "The party\u0027s deputy leader Richard Tice says he found out payments to his company had been flagged to the agency, after questions from the media.",
+      "PublishedAt": "2026-07-07T23:37:52Z"
+    },
+    {
+      "Id": "414fc9e1-4505-41ee-bcb3-15369e5e172a",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Harry loses High Court privacy case against Daily Mail publisher",
+      "Url": "https://www.bbc.co.uk/news/articles/c9324nyqwjno?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Judge Mr Justice Nicklin says the claimants had failed to prove the allegations.",
+      "PublishedAt": "2026-07-07T17:57:40Z"
+    },
+    {
+      "Id": "3b8ff2be-1b78-4eda-a8a3-b6fe915f72c3",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Hungary\u0027s public news broadcasts halted in bid to scrap Orban-era propaganda",
+      "Url": "https://www.bbc.co.uk/news/articles/cgevwq1pndgo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "The country\u0027s main state TV channel displayed a message saying it was \u0022sorry\u0022 for lying on Tuesday.",
+      "PublishedAt": "2026-07-07T18:34:45Z"
+    },
+    {
+      "Id": "bd593a45-c1d0-480d-97bb-e91b59644369",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Lawyer says detained Gaza doctor was severely beaten in Israeli jail",
+      "Url": "https://www.bbc.co.uk/news/articles/c07yy3pgrlmo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "The lawyer for Dr Hussam Abu Safiya tells the BBC his client was so badly beaten he could not recognise him during a visit last week.",
+      "PublishedAt": "2026-07-07T16:10:14Z"
+    },
+    {
+      "Id": "fe04f961-dbda-46a6-806a-41692f79cd26",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "One million more UK homeowners set  to face higher mortgages",
+      "Url": "https://www.bbc.co.uk/news/articles/cze9kpxx6d8o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Homeowners face paying \u00A345 a month more on average when they move onto a new deal over the next two years.",
+      "PublishedAt": "2026-07-07T15:18:00Z"
+    },
+    {
+      "Id": "b5c2e5af-8d03-4bbf-9ab8-e803b25aeac2",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Online gamblers betting more than \u00A31,000 to face new checks",
+      "Url": "https://www.bbc.co.uk/news/articles/cqj1xvy44xno?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Punters who bet more than \u00A31,000 online in a 24-hour window will have to undergo an assessment, the regulator says.",
+      "PublishedAt": "2026-07-07T14:18:25Z"
+    },
+    {
+      "Id": "1bfb6fc5-6862-4782-8b56-3cf4e6fb9632",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Russia could compete at LA 2028 Olympics",
+      "Url": "https://www.bbc.co.uk/sport/olympics/articles/cp8leyjn38zo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Russian athletes could be allowed to compete for their country at the 2028 Olympic Games in Los Angeles after the International Olympic Committee provisionally lifted their suspension.",
+      "PublishedAt": "2026-07-07T19:54:34Z"
+    },
+    {
+      "Id": "b78c94ab-4265-467b-a8bf-485b7f9d19c6",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "BBC News app",
+      "Url": "https://www.bbc.co.uk/news/10628994?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Top stories, breaking news, live reporting, and follow news topics that match your interests",
+      "PublishedAt": "2025-04-30T14:04:28Z"
+    },
+    {
+      "Id": "66cc07c1-0703-4aae-b93b-922e42dca7a4",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Nigel Farage Resigns As MP",
+      "Url": "https://www.bbc.co.uk/sounds/play/p0nx5dtz?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Nigel Farage resigns as MP but says he\u2019ll fight the by-election.",
+      "PublishedAt": "2026-07-07T19:05:00Z"
+    },
+    {
+      "Id": "3a5064de-2fb5-4de4-b221-630375763ccc",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "After 250 years, do US citizens still believe in the American Dream?",
+      "Url": "https://www.bbc.co.uk/sounds/play/w3ct8lz9?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Historian Heather Cox Richardson on what history tells us about modern America",
+      "PublishedAt": "2026-07-03T17:00:00Z"
+    },
+    {
+      "Id": "199e33b7-e70b-4d83-a8c6-d920019b228a",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Egypt fume at \u0027injustice\u0027 and make Messi favouritism claims after exit",
+      "Url": "https://www.bbc.co.uk/sport/football/articles/c5yzd23jll5o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "BBC Sport unpicks a game that will go down in World Cup history for featuring a team who were two goals down so late on, but who went on to win without needing extra time.",
+      "PublishedAt": "2026-07-07T21:33:21Z"
+    },
+    {
+      "Id": "db529b89-329d-433b-a53f-35c399d9810e",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "\u0027It is not normal\u0027 - but extraordinary Djokovic defies odds once again",
+      "Url": "https://www.bbc.co.uk/sport/tennis/articles/cy8wev0p0wno?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "It is worth remembering that what you are watching is not normal - but Novak Djokovic is anything but ordinary in another thrilling Wimbledon match.",
+      "PublishedAt": "2026-07-07T23:46:39Z"
+    },
+    {
+      "Id": "78f18537-0417-401c-8517-36f6b06d9648",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Tears of relief? Messi adds another incredible chapter to World Cup career",
+      "Url": "https://www.bbc.co.uk/sport/football/articles/cz6v407y3qjo?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Argentina great Lionel Messi sheds tears as they fight back to beat Egypt and reach the World Cup quarter-finals.",
+      "PublishedAt": "2026-07-07T20:28:19Z"
+    },
+    {
+      "Id": "fa0f4296-8cdc-4da9-b6f6-005d265b2506",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Superb England inflict record T20 defeat on India",
+      "Url": "https://www.bbc.co.uk/sport/cricket/articles/cn59nkwp275o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "England inflict a record defeat on India in the third Twenty20 at Trent Bridge to give the home side a 2-0 lead with two matches in the series remaining.",
+      "PublishedAt": "2026-07-07T19:45:38Z"
+    },
+    {
+      "Id": "238ec2cc-b848-4af8-9627-c9e765c42788",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "Fulham appoint Arbeloa as Silva\u0027s successor",
+      "Url": "https://www.bbc.co.uk/sport/football/articles/cvgjnlj0d1go?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Fulham appoint Alvaro Arbeloa as their new manager on a three-year contract, succeeding Marco Silva who left for Benfica.",
+      "PublishedAt": "2026-07-07T23:04:42Z"
+    },
+    {
+      "Id": "6936d190-9ae6-4078-8b32-d1149d637859",
+      "FeedId": "c8281ee6-1e05-454f-9bd5-7c79448112b6",
+      "FeedTitle": "BBC News",
+      "Title": "\u0027How?!\u0027 - Gauff battles into first Wimbledon semi-final ",
+      "Url": "https://www.bbc.co.uk/sport/tennis/articles/c0qyv12xyw5o?at_medium=RSS\u0026at_campaign=rss",
+      "Description": "Coco Gauff surprised even herself by overcoming her recent grass-court struggles to reach a first Wimbledon semi-final against Karolina Muchova.",
+      "PublishedAt": "2026-07-07T18:08:20Z"
+    },
+    {
+      "Id": "2bf6ecfc-0e32-410b-bb73-9702cbd084a4",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Final extension: Startup Battlefield Australia applications now close July 20",
+      "Url": "https://techcrunch.com/2026/07/07/final-extension-startup-battlefield-australia-applications-now-close-july-20/",
+      "Description": "If you\u0027re building something ambitious, this is a fast track to the people who can move your startup forward.",
+      "PublishedAt": "2026-07-07T22:30:00Z"
+    },
+    {
+      "Id": "01b0a68e-56c5-4675-9f8f-9e54556c6dac",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Meta just launched a new AI generator, Muse Image, and users are already pushing back over use of their photos",
+      "Url": "https://techcrunch.com/2026/07/07/meta-rolls-out-muse-a-new-ai-image-generator/",
+      "Description": "The new image-generating model has numerous use cases, including advertising, decorating and creator-based opportunities.",
+      "PublishedAt": "2026-07-07T22:18:10Z"
+    },
+    {
+      "Id": "f3598978-4556-4659-815a-166893157127",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Why the rise of open source AI isn\u2019t hurting Anthropic \u2026 yet",
+      "Url": "https://techcrunch.com/2026/07/07/why-the-rise-of-open-source-ai-isnt-hurting-anthropic-yet/",
+      "Description": "Open source models\u2019 success isn\u2019t coming at the expense of frontier labs. Instead, they each seem to capture two phases of the same life cycle.",
+      "PublishedAt": "2026-07-07T20:04:32Z"
+    },
+    {
+      "Id": "9cf3ff74-e6d3-4a3b-98f5-72f9f1638610",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Microsoft joins AI cost-cutting trend by relying more on its own models",
+      "Url": "https://techcrunch.com/2026/07/07/microsoft-joins-ai-cost-cutting-trend-by-relying-more-on-its-own-models/",
+      "Description": "Microsoft is the latest Silicon Valley giant to cut back on its AI spending.",
+      "PublishedAt": "2026-07-07T19:58:20Z"
+    },
+    {
+      "Id": "61da80b0-45db-4d20-a2a3-27d50d2a0872",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Discord admits AI moderation bug wrongfully banned users over harmless images",
+      "Url": "https://techcrunch.com/2026/07/07/discord-admits-ai-moderation-bug-wrongfully-banned-users-over-harmless-images/",
+      "Description": "The company confirmed that the issue had been affecting accounts since May, with an additional 200 users banned over the weekend before its team identified and fixed the problem.",
+      "PublishedAt": "2026-07-07T19:28:38Z"
+    },
+    {
+      "Id": "847019d2-16aa-42f2-bea6-154c647e25b6",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Google\u2019s Pixel event is set for August 12",
+      "Url": "https://techcrunch.com/2026/07/07/googles-pixel-event-is-set-for-august-12/",
+      "Description": "Google\u0027s upcoming event in August will introduce new Pixel devices.",
+      "PublishedAt": "2026-07-07T18:38:29Z"
+    },
+    {
+      "Id": "d6e42926-05e5-47f5-95fd-17ee4edbd2a4",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Figma acquires team behind a vibe-coding app",
+      "Url": "https://techcrunch.com/2026/07/07/figma-acquires-team-behind-a-vibe-coding-app/",
+      "Description": "The Y Combinator-backed company started a vibe-coding platform and later built an agent-creation product.",
+      "PublishedAt": "2026-07-07T18:37:01Z"
+    },
+    {
+      "Id": "45c14436-0383-46ae-960e-dd0d5471776e",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Netflix dabbles in shorter video content with its new set of publisher deals with Variety, others",
+      "Url": "https://techcrunch.com/2026/07/07/netflix-dabbles-in-shorter-video-content-with-its-new-set-of-publisher-deals-with-variety-others/",
+      "Description": "Netflix is bringing 2- to 20-minute videos to its platform through new partnerships with digital publishers, including Rolling Stone and Variety.",
+      "PublishedAt": "2026-07-07T17:24:35Z"
+    },
+    {
+      "Id": "3caa647d-acd6-4935-b925-1abc60967929",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Hacked, leaked, and held for ransom: The worst breaches of 2026 so far",
+      "Url": "https://techcrunch.com/2026/07/07/the-worst-hacks-and-breaches-of-2026-so-far/",
+      "Description": "From a massive DOGE data breach and the hacking of critical energy and water systems to the hack of an FBI surveillance system, here are the most damaging security incidents and data breaches of 2026.",
+      "PublishedAt": "2026-07-07T16:45:00Z"
+    },
+    {
+      "Id": "f56d39df-39ba-4956-9f5c-8d1f2d407ba7",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Claude Cowork expands to mobile and web",
+      "Url": "https://techcrunch.com/2026/07/07/the-coding-agent-wars-are-spilling-into-the-rest-of-the-office-claude-cowork/",
+      "Description": "With this update, users can start a task from their desk, get status updates on their phone, and pick up the finished output later \u2014 even if their laptop is closed.",
+      "PublishedAt": "2026-07-07T16:27:18Z"
+    },
+    {
+      "Id": "dd42daed-fbea-49ba-92e9-7350b128d1d2",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "X adds a video editor to encourage creators to post original content, not stolen reposts",
+      "Url": "https://techcrunch.com/2026/07/07/x-adds-a-video-editor-to-encourage-creators-to-post-original-content-not-stolen-reposts/",
+      "Description": "X is rolling out a new video editor and recorder for iOS with multilingual captions, green-screen effects, and other editing tools.",
+      "PublishedAt": "2026-07-07T15:19:33Z"
+    },
+    {
+      "Id": "ad10649c-5352-404c-b1ae-6a2ff52db5f1",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "VC firm Chemistry is raising $500M for its second fund",
+      "Url": "https://techcrunch.com/2026/07/07/chemistry-ventures-is-raising-500m-for-its-second-fund/",
+      "Description": "Chemistry Ventures, the VC firm launched by Bessemer, Index Ventures, and Andreessen Horowitz alums, is raising $500M for its second fund.",
+      "PublishedAt": "2026-07-07T15:02:02Z"
+    },
+    {
+      "Id": "3d17fc20-b061-4ba7-b71e-4cefd937ba81",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "AI law startup Norm raises $120M, hits unicorn valuation",
+      "Url": "https://techcrunch.com/2026/07/07/ai-law-startup-norm-raises-120m-hits-unicorn-valuation/",
+      "Description": "AI law startup Norm has raised a $120 million Series C round led by Khosla Ventures, valuing the startup at $1.2 billion.",
+      "PublishedAt": "2026-07-07T14:35:42Z"
+    },
+    {
+      "Id": "e705f7a9-c0f6-4bde-a569-4c27b53a0b50",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "This startup pits dealerships against each other to bid on your used car",
+      "Url": "https://techcrunch.com/2026/07/07/this-startup-is-pitting-dealerships-against-each-other-to-bid-on-your-used-car/",
+      "Description": "Bidbus, which lets dealerships bid on used cars, has raised $15 million in a Series A round that was led by early-stage mobility fund Ibex Investors.",
+      "PublishedAt": "2026-07-07T14:00:00Z"
+    },
+    {
+      "Id": "560a4c7c-34e6-4cfd-b4eb-a8fcc46707ad",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Hacktivists call out Trump by hacking and defacing US Army websites",
+      "Url": "https://techcrunch.com/2026/07/07/hacktivists-call-out-trump-by-hacking-and-defacing-us-army-websites/",
+      "Description": "The U.S. Army has fixed two of its websites that were hacked to display messages calling President Trump a \u0022pedophile\u0022 and a \u0022thief.\u0022",
+      "PublishedAt": "2026-07-07T13:10:00Z"
+    },
+    {
+      "Id": "b117237d-0d77-4a23-9fd7-5a017462e9c2",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Savi\u2019s app aims to protect consumers from realistic AI scams like kidnappers demanding ransom",
+      "Url": "https://techcrunch.com/2026/07/07/savis-app-aims-to-protect-consumers-from-realistic-ai-scams-like-kidnappers-demanding-ransom/",
+      "Description": "The company just raised $7 million in seed funding, and is launching its app for iPhone and Android on Tuesday.",
+      "PublishedAt": "2026-07-07T12:00:00Z"
+    },
+    {
+      "Id": "ce50a130-1114-41d8-b817-2fe34fa28276",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "The first American autonomous ground vehicles are fighting in Ukraine",
+      "Url": "https://techcrunch.com/2026/07/07/the-first-american-autonomous-ground-vehicles-are-fighting-in-ukraine/",
+      "Description": "Forterra has deployed more than 100 of its self-driving ATVs in conflict zones in Ukraine.",
+      "PublishedAt": "2026-07-07T09:00:00Z"
+    },
+    {
+      "Id": "67a35557-4918-4679-b0c3-10bf538d1653",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "Netflix invented binge-watching. Now it may have outgrown it.",
+      "Url": "https://techcrunch.com/2026/07/06/netflix-invented-binge-watching-now-it-may-have-outgrown-it/",
+      "Description": "A new report suggests Netflix viewers aren\u2019t sticking around for Season 2. The bigger issue may be that binge-watching itself is no longer the advantage it once was.",
+      "PublishedAt": "2026-07-07T00:47:33Z"
+    },
+    {
+      "Id": "ea1370e9-099b-4e3f-b713-c29c4e357aa8",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "The \u2018first\u2019 AI-run ransomware attack still needed a human",
+      "Url": "https://techcrunch.com/2026/07/06/the-first-ai-run-ransomware-attack-still-needed-a-human/",
+      "Description": "An AI agent carried out the technical execution of a real-world ransomware attack for the first known time, but new details show a human still chose the victim, set up the infrastructure, and supplied stolen credentials \u2014 meaning it wasn\u0027t quite the fully autonomous cybercrime debut that last week\u0027s headlines suggested.",
+      "PublishedAt": "2026-07-06T23:56:14Z"
+    },
+    {
+      "Id": "8f8c245e-3287-4175-9c76-910231c7849a",
+      "FeedId": "a35df088-5a0c-4d7c-9d95-df547253e5e7",
+      "FeedTitle": "TechCrunch",
+      "Title": "US investors will soon get access to SK Hynix, another memory maker riding the AI boom",
+      "Url": "https://techcrunch.com/2026/07/06/us-investors-will-soon-get-access-to-sk-hynix-another-memory-maker-riding-the-ai-boom/",
+      "Description": "SK Hynix is experiencing a boom credited to AI. It will ride that to a multibillion-dollar U.S. IPO, expected to take place on Friday.",
+      "PublishedAt": "2026-07-06T23:21:03Z"
+    }
+  ]
+}
