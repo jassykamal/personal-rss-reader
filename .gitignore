@@ -1,0 +1,5 @@
+bin/
+obj/
+subscriptions.json
+.vs/
+*.user
