@@ -6,7 +6,7 @@ namespace RssReader;
 
 public interface IEmailService
 {
-    Task SendEmailAsync(string toEmail, string subject, string htmlBody);
+    Task<bool> SendEmailAsync(string toEmail, string subject, string htmlBody);
 }
 
 public class EmailService : IEmailService
@@ -20,13 +20,15 @@ public class EmailService : IEmailService
         _logger = logger;
     }
 
-    public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
+    public async Task<bool> SendEmailAsync(string toEmail, string subject, string htmlBody)
     {
         var host = _config["Smtp:Host"];
         if (string.IsNullOrWhiteSpace(host))
         {
-            _logger.LogWarning("SMTP not configured. Skipping email to {Email}: {Subject}", toEmail, subject);
-            return;
+            _logger.LogWarning(
+                "SMTP not configured. Email to {Email} not sent. Subject: {Subject}. Body: {Body}",
+                toEmail, subject, htmlBody);
+            return false;
         }
 
         var port = int.Parse(_config["Smtp:Port"] ?? "587");
@@ -61,5 +63,6 @@ public class EmailService : IEmailService
         await client.DisconnectAsync(true);
 
         _logger.LogInformation("Email sent to {Email}: {Subject}", toEmail, subject);
+        return true;
     }
 }

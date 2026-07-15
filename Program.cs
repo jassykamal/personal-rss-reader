@@ -195,9 +195,16 @@ app.MapPost("/api/auth/register", async (
       <p style='color:#888;font-size:0.85rem;margin-top:24px'>If you did not create this account, you can ignore this email.</p>
     </div>";
 
-    await emailService.SendEmailAsync(req.Email, "Verify your RSS Reader account", body);
+    var sent = await emailService.SendEmailAsync(req.Email, "Verify your RSS Reader account", body);
 
-    return Results.Ok(new { message = "Account created. Please check your email to verify your account." });
+    if (sent)
+        return Results.Ok(new { message = "Account created. Please check your email to verify your account." });
+
+    return Results.Ok(new
+    {
+        message = "Account created. SMTP not configured — use the link below to verify.",
+        verificationUrl = callbackUrl
+    });
 }).DisableAntiforgery();
 
 app.MapPost("/api/auth/login", async (
@@ -291,9 +298,16 @@ app.MapPost("/api/auth/resend-confirmation", async (
       <p style='color:#888;font-size:0.85rem;margin-top:24px'>If you did not request this, you can ignore this email.</p>
     </div>";
 
-    await emailService.SendEmailAsync(req.Email, "Verify your RSS Reader account", body);
+    var sent = await emailService.SendEmailAsync(req.Email, "Verify your RSS Reader account", body);
 
-    return Results.Ok(new { message = "If your email is registered and not yet verified, a new verification email has been sent." });
+    if (sent)
+        return Results.Ok(new { message = "If your email is registered and not yet verified, a new verification email has been sent." });
+
+    return Results.Ok(new
+    {
+        message = "SMTP not configured — use the link below.",
+        verificationUrl = callbackUrl
+    });
 }).DisableAntiforgery();
 
 // ── Favorites endpoints ─────────────────────────────────────────
