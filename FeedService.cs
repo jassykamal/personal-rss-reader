@@ -72,6 +72,8 @@ public class FeedService
             if (string.IsNullOrWhiteSpace(item.Title) && string.IsNullOrWhiteSpace(item.Link))
                 continue;
 
+            var rawContent = item.Description ?? item.Content ?? string.Empty;
+
             var article = new Article
             {
                 FeedId    = feed.Id,
@@ -81,7 +83,10 @@ public class FeedService
 
                 // Strip HTML tags from the description (XSS prevention +
                 // cleaner reading experience as requested)
-                Description = StripHtml(item.Description ?? item.Content ?? string.Empty),
+                Description = StripHtml(rawContent),
+
+                // Prefer images already embedded in the feed item content.
+                ImageUrl = ExtractImageUrl(rawContent),
 
                 // Use the article's publish date, or now if it's missing
                 PublishedAt = item.PublishingDate?.ToUniversalTime() ?? DateTime.UtcNow
@@ -120,5 +125,22 @@ public class FeedService
         var clean = Regex.Replace(decoded, @"\s+", " ").Trim();
 
         return clean;
+    }
+
+    private static string? ExtractImageUrl(string html)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+            return null;
+
+        var match = Regex.Match(
+            html,
+            "<img[^>]+src=[\"'](?<src>[^\"']+)[\"']",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        if (!match.Success)
+            return null;
+
+        var src = System.Net.WebUtility.HtmlDecode(match.Groups["src"].Value.Trim());
+        return Uri.TryCreate(src, UriKind.Absolute, out _) ? src : null;
     }
 }
