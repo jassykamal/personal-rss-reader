@@ -44,6 +44,9 @@ public class Article
     // A short description / excerpt (HTML tags stripped out)
     public string Description { get; set; } = string.Empty;
 
+    // Optional image discovered in the RSS/Atom item content.
+    public string? ImageUrl { get; set; }
+
     // When the article was published
     public DateTime PublishedAt { get; set; }
 }
