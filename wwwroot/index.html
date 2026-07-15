@@ -831,6 +831,69 @@
       font-weight: 600;
     }
 
+    .app-nav {
+      display: grid;
+      gap: 2px;
+      margin-bottom: 18px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.86rem;
+      font-weight: 650;
+      cursor: pointer;
+      transition: background 140ms ease, color 140ms ease;
+    }
+
+    .nav-item:hover { background: var(--soft); color: var(--text); }
+    .nav-item.active { background: var(--brand-soft); color: var(--brand-hover); font-weight: 750; }
+
+    .auth-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    .auth-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 650;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 140ms ease, color 140ms ease;
+      white-space: nowrap;
+    }
+
+    .auth-link:hover { background: var(--soft); color: var(--brand-hover); }
+    .auth-email { color: var(--subtle); font-size: 0.8rem; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .favorite-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 1.05rem;
+      color: var(--muted);
+      transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+    }
+
+    .favorite-btn:hover { background: var(--line); transform: scale(1.15); }
+    .favorite-btn.favorited { color: #e11d48; }
+    .favorite-btn.favorited:hover { background: rgba(225, 29, 72, 0.08); }
+
     .state {
       max-width: 540px;
       margin: 54px auto;
@@ -1212,6 +1275,12 @@
           </div>
         </section>
 
+        <nav class="app-nav" id="appNav" aria-label="Views">
+          <div class="nav-item active" data-view="all" id="navAll" role="button" tabindex="0">☰ <span data-i18n="navAll">All Articles</span></div>
+          <div class="nav-item" data-view="favorites" id="navFavorites" role="button" tabindex="0"><span data-i18n="navFavorites">♥ Favorites</span></div>
+          <div class="nav-item" data-view="recent" id="navRecent" role="button" tabindex="0"><span data-i18n="navRecent">↻ Recent</span></div>
+        </nav>
+
         <section aria-labelledby="feedsTitle">
           <div class="section-heading">
             <span class="section-title" id="feedsTitle" data-i18n="yourFeeds">Your feeds</span>
@@ -1234,6 +1303,7 @@
         <div class="topbar-actions">
           <span class="stat-pill"><strong id="articleCount">0</strong> <span data-i18n="articles">articles</span></span>
           <span class="stat-pill"><strong id="topFeedCount">0</strong> <span data-i18n="feeds">feeds</span></span>
+          <span class="auth-area" id="authArea"></span>
           <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
             <span class="theme-icon-light" aria-hidden="true">☀</span>
             <span class="theme-icon-dark" aria-hidden="true">☽</span>
@@ -1328,7 +1398,23 @@
         filterMonth: 'Month',
         sortNewest: 'Newest first',
         sortOldest: 'Oldest first',
-        minRead: '{count} min read'
+        minRead: '{count} min read',
+        signIn: 'Sign in',
+        signInToFavorite: 'Sign in to save favorites',
+        signInRequired: 'Sign in to access this feature',
+        favorites: 'Favorites',
+        favorite: 'Favorite',
+        favoriteAdded: 'Added to favorites',
+        favoriteRemoved: 'Removed from favorites',
+        logout: 'Logout',
+        loggedOut: 'Logged out',
+        navAll: 'All Articles',
+        navFavorites: 'Favorites',
+        navRecent: 'Recently Viewed',
+        noFavorites: 'No favorites yet',
+        noFavoritesMessage: 'Click the ♡ button on any article to save it here.',
+        noRecent: 'No recently viewed',
+        noRecentMessage: 'Articles you read will appear here.'
       },
       ar: {
         appName: 'قارئ RSS الشخصي',
@@ -1386,7 +1472,23 @@
         filterMonth: 'شهر',
         sortNewest: 'الأحدث أولا',
         sortOldest: 'الأقدم أولا',
-        minRead: '{count} دقائق قراءة'
+        minRead: '{count} دقائق قراءة',
+        signIn: 'تسجيل الدخول',
+        signInToFavorite: 'سجل الدخول لحفظ المفضلة',
+        signInRequired: 'سجل الدخول لاستخدام هذه الميزة',
+        favorites: 'المفضلة',
+        favorite: 'مفضلة',
+        favoriteAdded: 'تمت الإضافة للمفضلة',
+        favoriteRemoved: 'تمت الإزالة من المفضلة',
+        logout: 'تسجيل الخروج',
+        loggedOut: 'تم تسجيل الخروج',
+        navAll: 'كل المقالات',
+        navFavorites: 'المفضلة',
+        navRecent: 'شوهدت مؤخرا',
+        noFavorites: 'لا توجد مفضلة',
+        noFavoritesMessage: 'انقر على زر ♡ في أي مقال لحفظه هنا.',
+        noRecent: 'لا توجد مقالات مشاهد',
+        noRecentMessage: 'المقالات التي تقرأها ستظهر هنا.'
       }
     };
 
@@ -1398,6 +1500,9 @@
     let searchTimer = null;
     let dateFilter = 'all';
     let sortOrder = 'newest';
+    let isAuthenticated = false;
+    let favoritedUrls = new Set();
+    let currentView = 'all';
     let locale = localStorage.getItem('rss-reader-locale') || 'en';
     let toastTimer;
 
@@ -1420,7 +1525,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
       applyLocale();
       renderLoading();
-      await Promise.all([loadFeeds(), loadArticles()]);
+      await Promise.all([checkAuth(), loadFeeds(), loadArticles()]);
 
       subscribeBtn.addEventListener('click', addFeed);
       languageBtn.addEventListener('click', toggleLanguage);
@@ -1443,6 +1548,36 @@
       });
 
       document.querySelector('.topbar-copy').addEventListener('click', () => selectFeed(null));
+
+      articlesContainer.addEventListener('click', event => {
+        const favBtn = event.target.closest('.favorite-btn');
+        if (favBtn) {
+          event.preventDefault();
+          toggleFavorite(favBtn);
+          return;
+        }
+
+        const readLink = event.target.closest('.read-link');
+        if (readLink) {
+          recordArticleView(readLink.href, readLink.closest('.article-card'));
+        }
+      });
+
+      document.getElementById('appNav').addEventListener('click', event => {
+        const item = event.target.closest('.nav-item');
+        if (!item) return;
+        switchView(item.dataset.view);
+      });
+
+      document.getElementById('authArea').addEventListener('click', event => {
+        if (event.target.id === 'logoutBtn') {
+          event.preventDefault();
+          doLogout();
+        } else if (event.target.id === 'favoritesLink') {
+          event.preventDefault();
+          switchView('favorites');
+        }
+      });
 
       searchInput.addEventListener('input', doSearch);
       searchClear.addEventListener('click', clearSearch);
@@ -1527,7 +1662,9 @@
         articlesCache = await res.json();
         updateFilteredCount(articlesCache.length);
         updateStats();
-        renderFilteredArticles();
+        if (currentView === 'all') {
+          renderFilteredArticles();
+        }
       } catch {
         articlesContainer.innerHTML = renderState('◇', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
       }
@@ -1685,6 +1822,7 @@
             <div class="article-actions">
               <a class="read-link" href="${url}" target="_blank" rel="noopener noreferrer">${t('readArticle')} <span aria-hidden="true">${arrow}</span></a>
               <div class="article-actions-right">
+                <button class="favorite-btn${favoritedUrls.has(article.url || '') ? ' favorited' : ''}" type="button" data-url="${url}" title="${t('favorite')}" aria-label="${t('favorite')}">${favoritedUrls.has(article.url || '') ? '♥' : '♡'}</button>
                 <button class="article-action-btn" type="button" title="${t('shareArticle')}" onclick="shareArticle(event, '${url}', '${shareTitle}')" aria-label="${t('shareArticle')}">↗</button>
                 <button class="article-action-btn" type="button" title="${t('copyLink')}" onclick="copyArticleLink(event, '${url}')" aria-label="${t('copyLink')}">⧉</button>
               </div>
@@ -1899,6 +2037,159 @@
 
     function escapeRegex(str) {
       return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        isAuthenticated = data.authenticated;
+        if (isAuthenticated) {
+          window._authEmail = data.email || '';
+          await loadFavorites();
+        }
+        renderAuthArea();
+      } catch {
+        isAuthenticated = false;
+        renderAuthArea();
+      }
+    }
+
+    async function loadFavorites() {
+      try {
+        const res = await fetch('/api/favorites');
+        if (!res.ok) return;
+        const favs = await res.json();
+        favoritedUrls = new Set(favs.map(f => f.articleUrl));
+      } catch { /* ignore */ }
+    }
+
+    function renderAuthArea() {
+      const area = document.getElementById('authArea');
+      if (!area) return;
+      if (isAuthenticated) {
+        area.innerHTML = `<a class="auth-link" id="favoritesLink" role="button" tabindex="0">♥ ${t('favorites')}</a><span class="auth-email" title="${escHtml(window._authEmail || '')}">${escHtml((window._authEmail || '').split('@')[0])}</span><a class="auth-link" id="logoutBtn" role="button" tabindex="0">${t('logout')}</a>`;
+      } else {
+        area.innerHTML = `<a class="auth-link" href="login.html">${t('signIn')}</a>`;
+      }
+    }
+
+    async function toggleFavorite(btn) {
+      if (!isAuthenticated) {
+        showToast(t('signInToFavorite'), '');
+        return;
+      }
+
+      const url = btn.dataset.url;
+      const card = btn.closest('.article-card');
+      const title = card?.querySelector('.article-title')?.textContent || '';
+      const feedTitle = card?.querySelector('.article-meta span')?.textContent || '';
+      const img = card?.querySelector('.article-media img');
+      const imageUrl = img?.src || '';
+
+      const wasFav = favoritedUrls.has(url);
+
+      try {
+        const res = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle, imageUrl })
+        });
+        const data = await res.json();
+        if (data.favorited) {
+          favoritedUrls.add(url);
+          btn.classList.add('favorited');
+          btn.innerHTML = '♥';
+          showToast(t('favoriteAdded'), 'success');
+        } else {
+          favoritedUrls.delete(url);
+          btn.classList.remove('favorited');
+          btn.innerHTML = '♡';
+          showToast(t('favoriteRemoved'), 'success');
+        }
+      } catch {
+        showToast(t('networkError'), 'error');
+      }
+    }
+
+    async function recordArticleView(url, card) {
+      if (!isAuthenticated || !url) return;
+      const title = card?.querySelector('.article-title')?.textContent || '';
+      const feedTitle = card?.querySelector('.article-meta span')?.textContent || '';
+      try {
+        await fetch('/api/recently-viewed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle })
+        });
+        await fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle })
+        });
+      } catch { /* ignore */ }
+    }
+
+    async function switchView(view) {
+      currentView = view;
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
+
+      if (view === 'all') {
+        renderFilteredArticles();
+        return;
+      }
+
+      if (!isAuthenticated) {
+        showToast(t('signInRequired'), '');
+        renderFilteredArticles();
+        return;
+      }
+
+      articlesContainer.innerHTML = articleSkeletons();
+
+      try {
+        const endpoint = view === 'favorites' ? '/api/favorites' : '/api/recently-viewed';
+        const res = await fetch(endpoint);
+        if (!res.ok) throw new Error('Failed');
+        const items = await res.json();
+
+        if (!items.length) {
+          articlesContainer.innerHTML = renderState('◇',
+            view === 'favorites' ? t('noFavorites') : t('noRecent'),
+            view === 'favorites' ? t('noFavoritesMessage') : t('noRecentMessage'));
+          return;
+        }
+
+        const articles = items.map(item => ({
+          id: item.articleUrl,
+          feedId: '',
+          feedTitle: item.feedTitle,
+          title: item.articleTitle,
+          url: item.articleUrl,
+          description: '',
+          imageUrl: item.imageUrl || null,
+          publishedAt: item.savedAt || item.viewedAt || new Date().toISOString()
+        }));
+
+        articlesContainer.innerHTML = `<div class="articles-grid">${articles.map(renderArticle).join('')}</div>`;
+      } catch {
+        articlesContainer.innerHTML = renderState('⚠', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
+      }
+    }
+
+    async function doLogout() {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        isAuthenticated = false;
+        favoritedUrls.clear();
+        currentView = 'all';
+        renderAuthArea();
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === 'all'));
+        renderFilteredArticles();
+        showToast(t('loggedOut'), 'success');
+      } catch {
+        showToast(t('networkError'), 'error');
+      }
     }
 
     function t(key, values = {}) {
