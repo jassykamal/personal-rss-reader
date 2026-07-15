@@ -427,8 +427,8 @@
 
     .article-card:hover {
       transform: translateY(-3px);
-      border-color: rgba(15, 118, 110, 0.32);
-      box-shadow: var(--shadow);
+      border-color: rgba(15, 118, 110, 0.36);
+      box-shadow: var(--shadow), 0 0 0 1px rgba(15, 118, 110, 0.08);
     }
 
     .article-card.featured {
@@ -436,14 +436,15 @@
       grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.7fr);
       grid-template-rows: auto;
       min-height: 320px;
-      background: linear-gradient(135deg, #fff 0%, #f7fbfb 100%);
+      background: linear-gradient(135deg, #ffffff 0%, #f6faf9 100%);
+      border-color: rgba(15, 118, 110, 0.12);
     }
 
     .article-media {
       position: relative;
       min-height: 178px;
       background:
-        linear-gradient(135deg, rgba(15, 118, 110, 0.18), rgba(232, 93, 63, 0.12)),
+        linear-gradient(135deg, rgba(15, 118, 110, 0.10), rgba(232, 93, 63, 0.07)),
         var(--soft);
       overflow: hidden;
     }
@@ -460,12 +461,15 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      transition: transform 300ms ease;
+      transition: transform 300ms ease, opacity 400ms ease;
       z-index: 1;
+      opacity: 0;
     }
 
+    .article-media img[src] { opacity: 1; }
+
     .article-card:hover .article-media img { transform: scale(1.035); }
-    .article-media.image-failed img { display: none; }
+    .article-media.image-failed img { display: none; opacity: 0; }
 
     .media-fallback {
       display: grid;
@@ -529,7 +533,8 @@
       font-weight: 850;
       letter-spacing: 0;
       overflow-wrap: anywhere;
-      transition: color 160ms ease;
+      transition: color 180ms ease;
+      display: inline-block;
     }
 
     .featured .article-title {
@@ -537,12 +542,13 @@
       line-height: 1.12;
     }
 
-    .article-title:hover { color: var(--brand-dark); }
+    .article-title:hover { color: var(--brand); }
+    .article-title:active { color: var(--brand-dark); }
 
     .article-desc {
       margin: 0;
-      color: #46536a;
-      line-height: 1.65;
+      color: #4a5568;
+      line-height: 1.68;
       font-size: 0.94rem;
       display: -webkit-box;
       -webkit-box-orient: vertical;
@@ -562,69 +568,113 @@
       gap: 8px;
       color: var(--brand-dark);
       text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 850;
+      font-size: 0.88rem;
+      font-weight: 750;
       margin-top: auto;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(15, 118, 110, 0.06);
+      transition: background 180ms ease, color 180ms ease;
     }
 
-    .read-link:hover { text-decoration: underline; }
+    .read-link:hover { background: rgba(15, 118, 110, 0.13); text-decoration: none; }
 
     .state {
-      max-width: 680px;
+      max-width: 540px;
       margin: 54px auto;
-      padding: 42px 24px;
+      padding: 48px 32px;
+      text-align: center;
       background: rgba(255, 255, 255, 0.74);
+      border: 1px solid var(--line);
+      border-radius: 12px;
       box-shadow: var(--shadow-soft);
     }
 
     .state-icon {
       display: grid;
       place-items: center;
-      width: 52px;
-      height: 52px;
-      margin: 0 auto 16px;
-      border-radius: var(--radius);
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 18px;
+      border-radius: 14px;
       background: var(--brand-soft);
       color: var(--brand-dark);
-      font-size: 1.45rem;
-      font-weight: 900;
+      font-size: 1.5rem;
+      font-weight: 850;
     }
 
     .state-title {
-      margin: 0 0 7px;
-      font-size: 1.18rem;
+      margin: 0 0 8px;
+      font-size: 1.22rem;
       color: var(--text);
+      font-weight: 850;
     }
 
     .state-message {
       margin: 0;
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.6;
+      font-size: 0.95rem;
     }
 
     .loading-stack {
       display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
       gap: 18px;
       max-width: 1180px;
       margin: 0 auto;
     }
 
     .skeleton {
-      position: relative;
-      overflow: hidden;
-      min-height: 176px;
+      display: grid;
+      grid-template-rows: 178px auto;
       border-radius: var(--radius);
       background: rgba(255, 255, 255, 0.68);
       border: 1px solid var(--line);
+      overflow: hidden;
     }
 
-    .skeleton::after {
+    .skeleton-img {
+      background: #e8ecf1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skeleton-img::after {
       content: "";
       position: absolute;
       inset: 0;
       transform: translateX(-100%);
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
-      animation: shimmer 1100ms infinite;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+      animation: shimmer 1200ms infinite 200ms;
+    }
+
+    .skeleton-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 18px;
+    }
+
+    .skeleton-line {
+      height: 14px;
+      border-radius: 7px;
+      background: #e4eaf2;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skeleton-line.short { width: 55%; }
+    .skeleton-line.medium { width: 82%; }
+    .skeleton-line.long { width: 100%; }
+
+    .skeleton-line::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+      animation: shimmer 1200ms infinite;
     }
 
     .spinner {
@@ -672,8 +722,16 @@
     .toast.error { border-inline-start-color: var(--danger); }
     .toast.success { border-inline-start-color: var(--success); }
 
-    .article-card.article-rtl { text-align: right; }
+    .article-card.article-rtl {
+      text-align: right;
+      direction: rtl;
+    }
     .article-card.article-rtl .article-meta { direction: rtl; }
+    .article-card.article-rtl .article-title { direction: rtl; text-align: right; }
+    .article-card.article-rtl .article-desc { direction: rtl; text-align: right; }
+    .article-card.article-rtl .read-link { direction: rtl; }
+
+    .article-card.article-rtl.article-card:not(.article-rtl) .article-desc { direction: ltr; text-align: left; }
 
     [dir="rtl"] .app,
     [dir="rtl"] .brand-mark,
@@ -697,6 +755,41 @@
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .articles-scroll::-webkit-scrollbar { width: 6px; }
+    .articles-scroll::-webkit-scrollbar-track { background: transparent; }
+    .articles-scroll::-webkit-scrollbar-thumb { background: rgba(15, 118, 110, 0.14); border-radius: 3px; }
+    .articles-scroll::-webkit-scrollbar-thumb:hover { background: rgba(15, 118, 110, 0.28); }
+    .sidebar-content::-webkit-scrollbar { width: 4px; }
+    .sidebar-content::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-content::-webkit-scrollbar-thumb { background: rgba(15, 118, 110, 0.12); border-radius: 2px; }
+    .sidebar-content::-webkit-scrollbar-thumb:hover { background: rgba(15, 118, 110, 0.24); }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible {
+      outline: 2px solid rgba(15, 118, 110, 0.7);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .article-media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 62%, rgba(23, 32, 51, 0.08));
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 240ms ease;
+    }
+
+    .article-media.image-failed::after { opacity: 0; }
+    .article-card:hover .article-media::after { background: linear-gradient(180deg, transparent 56%, rgba(23, 32, 51, 0.13)); }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -1014,13 +1107,13 @@
         updateStats();
 
         if (!articles.length) {
-          articlesContainer.innerHTML = renderState('◇', t('emptyArticlesTitle'), t('emptyArticlesMessage'));
+          articlesContainer.innerHTML = renderState('✧', t('emptyArticlesTitle'), t('emptyArticlesMessage'));
           return;
         }
 
         articlesContainer.innerHTML = `<div class="articles-grid">${articles.map(renderArticle).join('')}</div>`;
       } catch {
-        articlesContainer.innerHTML = renderState('!', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
+        articlesContainer.innerHTML = renderState('⚠', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
       }
     }
 
@@ -1077,7 +1170,7 @@
           <div class="feed-top">
             <span class="feed-dot"></span>
             <div class="feed-copy">
-              <span class="feed-name" title="${title}">${title}</span>
+              <span class="feed-name" title="${title}" dir="auto">${title}</span>
               <span class="feed-url" title="${url}">${url}</span>
             </div>
           </div>
@@ -1114,7 +1207,7 @@
               <time datetime="${escAttr(article.publishedAt || '')}">${formatDate(article.publishedAt)}</time>
             </div>
             <a class="article-title" href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>
-            <p class="article-desc">${description}</p>
+            <p class="article-desc" dir="auto">${description}</p>
             <a class="read-link" href="${url}" target="_blank" rel="noopener noreferrer">${t('readArticle')} <span aria-hidden="true">${arrow}</span></a>
           </div>
         </article>
@@ -1146,9 +1239,9 @@
     function articleSkeletons() {
       return `
         <div class="loading-stack" aria-label="${t('loadingArticles')}">
-          <div class="skeleton"></div>
-          <div class="skeleton"></div>
-          <div class="skeleton"></div>
+          <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-meta"><div class="skeleton-line medium"></div><div class="skeleton-line long"></div><div class="skeleton-line short"></div></div></div>
+          <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-meta"><div class="skeleton-line medium"></div><div class="skeleton-line long"></div><div class="skeleton-line short"></div></div></div>
+          <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-meta"><div class="skeleton-line medium"></div><div class="skeleton-line long"></div><div class="skeleton-line short"></div></div></div>
         </div>
       `;
     }
