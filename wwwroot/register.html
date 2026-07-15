@@ -139,20 +139,6 @@
       text-align: center;
     }
 
-    .success-msg {
-      display: none;
-      text-align: center;
-      padding: 20px 0;
-    }
-
-    .success-msg .icon {
-      width: 48px; height: 48px; border-radius: 12px; background: var(--brand-soft);
-      color: var(--brand); display: grid; place-items: center; font-size: 1.4rem; margin: 0 auto 14px;
-    }
-
-    .success-msg h2 { font-size: 1.2rem; margin-bottom: 6px; }
-    .success-msg p { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
-
     .hint {
       margin-top: 4px;
       color: var(--subtle);
@@ -213,16 +199,6 @@
       <button type="submit" id="submitBtn">Create account</button>
       <div class="error" id="errorMsg" role="alert"></div>
     </form>
-    <div class="success-msg" id="successMsg">
-      <div class="icon">✉</div>
-      <h2 id="successTitle">Check your inbox</h2>
-      <p id="successText">A verification email has been sent. Click the link in the email to activate your account, then sign in.</p>
-      <div id="verificationUrlBox" style="display:none;margin-top:16px">
-        <p style="color:var(--muted);font-size:0.84rem;margin-bottom:8px">SMTP not configured — use this link to verify:</p>
-        <a id="verificationUrl" href="#" style="color:var(--brand);font-size:0.82rem;word-break:break-all"></a>
-        <p style="color:var(--subtle);font-size:0.76rem;margin-top:4px">(Copy and paste this link in your browser)</p>
-      </div>
-    </div>
     <div class="footer">
       Already have an account? <a href="login.html">Sign in</a>
     </div>
@@ -270,16 +246,7 @@
 
         const data = await res.json();
         if (res.ok) {
-          document.getElementById('registerForm').style.display = 'none';
-          document.getElementById('successMsg').style.display = 'block';
-
-          if (data.verificationUrl) {
-            document.getElementById('successTitle').textContent = 'Verification link';
-            document.getElementById('successText').textContent = 'Copy the link below and paste it in your browser to verify your email.';
-            document.getElementById('verificationUrlBox').style.display = 'block';
-            document.getElementById('verificationUrl').href = data.verificationUrl;
-            document.getElementById('verificationUrl').textContent = data.verificationUrl;
-          }
+          window.location.href = '/';
         } else {
           errorEl.textContent = data.error || 'Registration failed.';
         }
