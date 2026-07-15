@@ -6,7 +6,6 @@ namespace RssReader;
 
 public class FeedService
 {
-    private static readonly HttpClient HttpClient = new() { Timeout = TimeSpan.FromSeconds(20) };
     private static readonly XNamespace MediaNs = "http://search.yahoo.com/mrss/";
 
     private readonly StorageService _storage;
@@ -32,14 +31,10 @@ public class FeedService
     public async Task RefreshFeedAsync(Feed feed)
     {
         CodeHollow.FeedReader.Feed parsedFeed;
-        Dictionary<string, string>? mediaLookup = null;
 
         try
         {
             parsedFeed = await FeedReader.ReadAsync(feed.Url);
-
-            var rawXml = await HttpClient.GetStringAsync(feed.Url);
-            mediaLookup = ParseMediaFromXml(rawXml);
         }
         catch
         {
@@ -63,10 +58,9 @@ public class FeedService
                 Title       = item.Title ?? "(No title)",
                 Url         = item.Link  ?? string.Empty,
                 Description = StripHtml(rawContent),
-                ImageUrl    = ExtractBestImage(rawContent, item.Link, mediaLookup),
+                ImageUrl    = ExtractImageUrl(item, rawContent),
                 PublishedAt = item.PublishingDate?.ToUniversalTime() ?? DateTime.UtcNow
             };
-
             data.Articles.Add(article);
         }
 
@@ -89,21 +83,19 @@ public class FeedService
         return clean;
     }
 
-    private static string? ExtractBestImage(string rawContent, string? articleLink,
-                                             Dictionary<string, string>? mediaLookup)
+    private static string? ExtractImageUrl(FeedItem item, string rawContent)
     {
-        var imgUrl = ExtractFromImgTags(rawContent, articleLink);
+        var imgUrl = ExtractFromImgTags(rawContent, item.Link);
         if (imgUrl != null) return imgUrl;
 
-        if (mediaLookup != null && !string.IsNullOrWhiteSpace(articleLink) &&
-            mediaLookup.TryGetValue(articleLink, out var mediaUrl))
-            return mediaUrl;
-
-        return null;
+        return ExtractFromSpecificItem(item);
     }
 
     private static string? ExtractFromImgTags(string html, string? baseUrl)
     {
+        if (string.IsNullOrWhiteSpace(html))
+            return null;
+
         var matches = Regex.Matches(
             html,
             "<img[^>]+src=[\"'](?<src>[^\"']+)[\"']",
@@ -125,160 +117,150 @@ public class FeedService
         return null;
     }
 
-    private static Dictionary<string, string> ParseMediaFromXml(string rawXml)
+    private static string? ExtractFromSpecificItem(FeedItem item)
     {
-        var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var si = item.SpecificItem;
+        if (si == null) return null;
 
-        try
+        if (si is CodeHollow.FeedReader.Feeds.MediaRssFeedItem mediaItem)
         {
-            var doc = XDocument.Parse(rawXml);
-            if (doc.Root == null) return lookup;
+            var url = ExtractFromMediaRssItem(mediaItem);
+            if (url != null) return url;
+        }
+        else if (si is CodeHollow.FeedReader.Feeds.Rss20FeedItem rss20Item)
+        {
+            var url = ExtractEnclosureUrl(rss20Item.Enclosure);
+            if (url != null) return url;
+        }
+        else if (si is CodeHollow.FeedReader.Feeds.Rss092FeedItem rss092Item)
+        {
+            var url = ExtractEnclosureUrl(rss092Item.Enclosure);
+            if (url != null) return url;
+        }
 
-            var items = FindFeedItems(doc);
+        return ExtractFromXElement(si.Element);
+    }
 
-            foreach (var itemEl in items)
+    private static string? ExtractFromMediaRssItem(
+        CodeHollow.FeedReader.Feeds.MediaRssFeedItem mediaItem)
+    {
+        foreach (var media in mediaItem.Media)
+        {
+            var url = PickMediaUrl(media);
+            if (url != null) return url;
+
+            if (media.Thumbnails != null)
             {
-                var link = ExtractItemLink(itemEl);
-                if (string.IsNullOrWhiteSpace(link)) continue;
-
-                var imageUrl = ExtractMediaFromItem(itemEl);
-                if (imageUrl != null)
-                    lookup[link] = imageUrl;
+                foreach (var thumb in media.Thumbnails)
+                {
+                    if (!string.IsNullOrWhiteSpace(thumb.Url) && IsAbsoluteUrl(thumb.Url))
+                        return thumb.Url;
+                }
             }
         }
-        catch
+
+        foreach (var group in mediaItem.MediaGroups)
         {
+            foreach (var media in group.Media)
+            {
+                var url = PickMediaUrl(media);
+                if (url != null) return url;
+            }
         }
 
-        return lookup;
+        return ExtractEnclosureUrl(mediaItem.Enclosure);
     }
 
-    private static List<XElement> FindFeedItems(XDocument doc)
+    private static string? PickMediaUrl(CodeHollow.FeedReader.Feeds.MediaRSS.Media media)
     {
-        var items = doc.Descendants("item").ToList();
-        if (items.Count > 0) return items;
+        if (string.IsNullOrWhiteSpace(media.Url)) return null;
+        if (!IsAbsoluteUrl(media.Url)) return null;
 
-        items = doc.Descendants()
-            .Where(e => e.Name.LocalName.Equals("entry", StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        if (items.Count > 0) return items;
-
-        items = doc.Descendants()
-            .Where(e => e.Name.LocalName.Equals("entry", StringComparison.OrdinalIgnoreCase) ||
-                        e.Name.LocalName.Equals("item", StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        return items;
-    }
-
-    private static string? ExtractItemLink(XElement item)
-    {
-        var linkEl = item.Element("link");
-        if (linkEl != null)
-        {
-            var text = linkEl.Value.Trim();
-            if (!string.IsNullOrWhiteSpace(text)) return text;
-
-            var href = linkEl.Attribute("href")?.Value?.Trim();
-            if (!string.IsNullOrWhiteSpace(href)) return href;
-        }
-
-        var links = item.Elements()
-            .Where(e => e.Name.LocalName.Equals("link", StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        foreach (var l in links)
-        {
-            var href = l.Attribute("href")?.Value?.Trim();
-            if (!string.IsNullOrWhiteSpace(href)) return href;
-        }
-
-        var guid = item.Element("guid")?.Value?.Trim();
-        if (!string.IsNullOrWhiteSpace(guid)) return guid;
-
-        var atomId = item.Elements()
-            .FirstOrDefault(e => e.Name.LocalName.Equals("id", StringComparison.OrdinalIgnoreCase))
-            ?.Value?.Trim();
-        if (!string.IsNullOrWhiteSpace(atomId)) return atomId;
+        var m = media.Medium;
+        if (m == CodeHollow.FeedReader.Feeds.MediaRSS.Medium.Image ||
+            m == CodeHollow.FeedReader.Feeds.MediaRSS.Medium.Unknown)
+            return media.Url;
 
         return null;
     }
 
-    private static string? ExtractMediaFromItem(XElement item)
+    private static string? ExtractEnclosureUrl(
+        CodeHollow.FeedReader.Feeds.FeedItemEnclosure? enc)
     {
-        foreach (var el in item.Elements())
-        {
-            if (el.Name == MediaNs + "content" || el.Name == MediaNs + "thumbnail")
-            {
-                var url = el.Attribute("url")?.Value;
-                if (!string.IsNullOrWhiteSpace(url))
-                {
-                    var decoded = System.Net.WebUtility.HtmlDecode(url).Trim();
-                    if (IsAbsoluteUrl(decoded))
-                        return decoded;
-                }
-            }
+        if (enc?.Url == null) return null;
+        if (!IsAbsoluteUrl(enc.Url)) return null;
 
-            if (el.Name == MediaNs + "group")
-            {
-                foreach (var child in el.Elements())
-                {
-                    if (child.Name == MediaNs + "content" || child.Name == MediaNs + "thumbnail")
-                    {
-                        var url = child.Attribute("url")?.Value;
-                        if (!string.IsNullOrWhiteSpace(url))
-                        {
-                            var decoded = System.Net.WebUtility.HtmlDecode(url).Trim();
-                            if (IsAbsoluteUrl(decoded))
-                                return decoded;
-                        }
-                    }
-                }
-            }
+        var encType = enc.MediaType ?? "";
+        if (encType.Length == 0 || encType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            return enc.Url;
+
+        return null;
+    }
+
+    private static string? ExtractFromXElement(XElement element)
+    {
+        if (element == null) return null;
+
+        var url = PickFirstMediaElement(element, MediaNs + "content")
+               ?? PickFirstMediaElement(element, MediaNs + "thumbnail")
+               ?? PickEnclosureUrl(element)
+               ?? PickAtomEnclosureUrl(element);
+
+        return url;
+    }
+
+    private static string? PickFirstMediaElement(XElement element, XName name)
+    {
+        var el = element.Descendants(name)
+            .FirstOrDefault(e => e.Attribute("url") != null);
+
+        if (el == null)
+        {
+            var groupEl = element.Element(MediaNs + "group");
+            if (groupEl != null)
+                el = groupEl.Elements(name)
+                    .FirstOrDefault(e => e.Attribute("url") != null);
         }
 
-        var enclosure = item.Element("enclosure")
-            ?? item.Elements().FirstOrDefault(e =>
-                e.Name.LocalName.Equals("enclosure", StringComparison.OrdinalIgnoreCase));
+        var url = System.Net.WebUtility.HtmlDecode(el?.Attribute("url")?.Value?.Trim() ?? "");
+        return IsAbsoluteUrl(url) ? url : null;
+    }
 
-        if (enclosure != null)
+    private static string? PickEnclosureUrl(XElement element)
+    {
+        var enc = element.Element("enclosure")
+               ?? element.Descendants("enclosure").FirstOrDefault();
+
+        if (enc == null) return null;
+
+        var type = enc.Attribute("type")?.Value ?? "";
+        if (type.Length > 0 && !type.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var url = System.Net.WebUtility.HtmlDecode(enc.Attribute("url")?.Value?.Trim() ?? "");
+        return IsAbsoluteUrl(url) ? url : null;
+    }
+
+    private static string? PickAtomEnclosureUrl(XElement element)
+    {
+        foreach (var link in element.Descendants())
         {
-            var type = enclosure.Attribute("type")?.Value ?? "";
-            if (string.IsNullOrWhiteSpace(type) ||
-                type.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-            {
-                var url = enclosure.Attribute("url")?.Value;
-                if (!string.IsNullOrWhiteSpace(url))
-                {
-                    var decoded = System.Net.WebUtility.HtmlDecode(url).Trim();
-                    if (IsAbsoluteUrl(decoded))
-                        return decoded;
-                }
-            }
-        }
+            if (!link.Name.LocalName.Equals("link", StringComparison.OrdinalIgnoreCase))
+                continue;
 
-        var atomLinkEnclosure = item.Elements()
-            .Where(e => e.Name.LocalName.Equals("link", StringComparison.OrdinalIgnoreCase))
-            .FirstOrDefault(e =>
-            {
-                var rel = e.Attribute("rel")?.Value ?? "";
-                return rel.Equals("enclosure", StringComparison.OrdinalIgnoreCase);
-            });
+            var rel = link.Attribute("rel")?.Value ?? "";
+            if (!rel.Equals("enclosure", StringComparison.OrdinalIgnoreCase))
+                continue;
 
-        if (atomLinkEnclosure != null)
-        {
-            var type = atomLinkEnclosure.Attribute("type")?.Value ?? "";
-            if (string.IsNullOrWhiteSpace(type) ||
-                type.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-            {
-                var href = atomLinkEnclosure.Attribute("href")?.Value;
-                if (!string.IsNullOrWhiteSpace(href))
-                {
-                    var decoded = System.Net.WebUtility.HtmlDecode(href).Trim();
-                    if (IsAbsoluteUrl(decoded))
-                        return decoded;
-                }
-            }
+            var type = link.Attribute("type")?.Value ?? "";
+            if (type.Length > 0 && !type.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var href = System.Net.WebUtility.HtmlDecode(
+                link.Attribute("href")?.Value?.Trim() ?? "");
+
+            if (IsAbsoluteUrl(href))
+                return href;
         }
 
         return null;
