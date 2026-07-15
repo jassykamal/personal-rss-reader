@@ -1,4 +1,73 @@
+
+using Microsoft.AspNetCore.Identity;
+
 namespace RssReader;
+
+public class ApplicationUser : IdentityUser { }
+
+public class FavoriteArticle
+{
+    public int Id { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public ApplicationUser? User { get; set; }
+    public string ArticleUrl { get; set; } = string.Empty;
+    public string ArticleTitle { get; set; } = string.Empty;
+    public string FeedTitle { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public DateTime SavedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class RecentlyViewedArticle
+{
+    public int Id { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public ApplicationUser? User { get; set; }
+    public string ArticleUrl { get; set; } = string.Empty;
+    public string ArticleTitle { get; set; } = string.Empty;
+    public string FeedTitle { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public DateTime ViewedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class ReadingHistory
+{
+    public int Id { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public ApplicationUser? User { get; set; }
+    public string ArticleUrl { get; set; } = string.Empty;
+    public string ArticleTitle { get; set; } = string.Empty;
+    public string FeedTitle { get; set; } = string.Empty;
+    public DateTime ReadAt { get; set; } = DateTime.UtcNow;
+}
+
+public class RegisterRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public class LoginRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public bool RememberMe { get; set; }
+}
+
+public class FavoriteRequest
+{
+    public string ArticleUrl { get; set; } = string.Empty;
+    public string ArticleTitle { get; set; } = string.Empty;
+    public string FeedTitle { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+}
+
+public class ViewArticleRequest
+{
+    public string ArticleUrl { get; set; } = string.Empty;
+    public string ArticleTitle { get; set; } = string.Empty;
+    public string FeedTitle { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+}
 
 // ─────────────────────────────────────────────────────────────
 // A "Feed" is one RSS subscription the user has added.
