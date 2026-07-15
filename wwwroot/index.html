@@ -525,8 +525,8 @@
 
     .article-card:hover {
       transform: translateY(-3px);
-      border-color: rgba(15, 118, 110, 0.36);
-      box-shadow: var(--shadow), 0 0 0 1px rgba(15, 118, 110, 0.08);
+      border-color: rgba(13, 148, 136, 0.36);
+      box-shadow: var(--shadow), 0 0 0 1px rgba(13, 148, 136, 0.08);
     }
 
     .article-card.featured {
@@ -632,12 +632,16 @@
       letter-spacing: 0;
       overflow-wrap: anywhere;
       transition: color 180ms ease;
-      display: inline-block;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
     }
 
     .featured .article-title {
       font-size: clamp(1.55rem, 3vw, 2.45rem);
       line-height: 1.12;
+      -webkit-line-clamp: 3;
     }
 
     .article-title:hover { color: var(--brand); }
@@ -660,15 +664,13 @@
     }
 
     .read-link {
-      align-self: flex-start;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       color: var(--brand-hover);
       text-decoration: none;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       font-weight: 750;
-      margin-top: auto;
       padding: 6px 12px;
       border-radius: 6px;
       background: rgba(13, 148, 136, 0.08);
@@ -676,6 +678,37 @@
     }
 
     .read-link:hover { background: rgba(13, 148, 136, 0.16); text-decoration: none; }
+
+    .article-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .article-actions-right {
+      display: flex;
+      gap: 2px;
+    }
+
+    .article-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 140ms ease, color 140ms ease;
+      flex: 0 0 auto;
+    }
+
+    .article-action-btn:hover { background: var(--line); color: var(--text); }
 
     .state {
       max-width: 540px;
@@ -828,6 +861,7 @@
     .article-card.article-rtl .article-title { direction: rtl; text-align: right; }
     .article-card.article-rtl .article-desc { direction: rtl; text-align: right; }
     .article-card.article-rtl .read-link { direction: rtl; }
+    .article-card.article-rtl .article-actions { direction: rtl; }
 
     .article-card.article-rtl.article-card:not(.article-rtl) .article-desc { direction: ltr; text-align: left; }
 
@@ -1106,6 +1140,10 @@
         dayAgo: '{count}d ago',
         imageAlt: 'Article image for {title}',
         noDescription: 'No description available.',
+        shareArticle: 'Share',
+        copyLink: 'Copy link',
+        linkCopied: 'Link copied',
+        copyFailed: 'Failed to copy',
         menuLabel: 'Toggle feeds',
         langButton: 'العربية'
       },
@@ -1150,6 +1188,10 @@
         dayAgo: 'منذ {count} يوم',
         imageAlt: 'صورة المقال: {title}',
         noDescription: 'لا يوجد وصف متاح.',
+        shareArticle: 'مشاركة',
+        copyLink: 'نسخ الرابط',
+        linkCopied: 'تم نسخ الرابط',
+        copyFailed: 'فشل النسخ',
         menuLabel: 'إظهار المصادر',
         langButton: 'English'
       }
@@ -1381,6 +1423,7 @@
       const imageUrl = article.imageUrl ? escAttr(article.imageUrl) : '';
       const cardClass = `article-card ${featured ? 'featured' : ''} ${rtl ? 'article-rtl' : ''}`;
       const arrow = locale === 'ar' || rtl ? '←' : '→';
+      const shareTitle = escAttr(article.title || '');
 
       return `
         <article class="${cardClass}" style="--feed-color:${color}" dir="${rtl ? 'rtl' : 'auto'}">
@@ -1395,7 +1438,13 @@
             </div>
             <a class="article-title" href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>
             <p class="article-desc" dir="auto">${description}</p>
-            <a class="read-link" href="${url}" target="_blank" rel="noopener noreferrer">${t('readArticle')} <span aria-hidden="true">${arrow}</span></a>
+            <div class="article-actions">
+              <a class="read-link" href="${url}" target="_blank" rel="noopener noreferrer">${t('readArticle')} <span aria-hidden="true">${arrow}</span></a>
+              <div class="article-actions-right">
+                <button class="article-action-btn" type="button" title="${t('shareArticle')}" onclick="shareArticle(event, '${url}', '${shareTitle}')">↗</button>
+                <button class="article-action-btn" type="button" title="${t('copyLink')}" onclick="copyArticleLink(event, '${url}')">⧉</button>
+              </div>
+            </div>
           </div>
         </article>
       `;
@@ -1528,6 +1577,26 @@
       toastTimer = setTimeout(() => {
         toast.className = `toast ${type}`;
       }, 3500);
+    }
+
+    function shareArticle(event, url, title) {
+      event.stopPropagation();
+      if (navigator.share) {
+        navigator.share({ title, url }).catch(() => {});
+      } else {
+        copyToClipboard(url);
+      }
+    }
+
+    function copyArticleLink(event, url) {
+      event.stopPropagation();
+      copyToClipboard(url);
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text)
+        .then(() => showToast(t('linkCopied'), 'success'))
+        .catch(() => showToast(t('copyFailed'), 'error'));
     }
 
     function t(key, values = {}) {
