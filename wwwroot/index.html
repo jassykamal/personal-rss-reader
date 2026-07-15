@@ -1494,7 +1494,6 @@
 
     let feedsCache = [];
     let articlesCache = [];
-    let articleCount = 0;
     let selectedFeedId = null;
     let searchQuery = '';
     let searchTimer = null;
@@ -1503,6 +1502,7 @@
     let isAuthenticated = false;
     let favoritedUrls = new Set();
     let currentView = 'all';
+    let csrfToken = '';
     let locale = localStorage.getItem('rss-reader-locale') || 'en';
     let toastTimer;
 
@@ -2041,11 +2041,16 @@
 
     async function checkAuth() {
       try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
-        isAuthenticated = data.authenticated;
+        const [authRes, csrfRes] = await Promise.all([
+          fetch('/api/auth/me'),
+          fetch('/api/antiforgery/token')
+        ]);
+        const authData = await authRes.json();
+        const csrfData = await csrfRes.json();
+        isAuthenticated = authData.authenticated;
+        csrfToken = csrfData.token || '';
         if (isAuthenticated) {
-          window._authEmail = data.email || '';
+          window._authEmail = authData.email || '';
           await loadFavorites();
         }
         renderAuthArea();
@@ -2092,7 +2097,10 @@
       try {
         const res = await fetch('/api/favorites', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+          },
           body: JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle, imageUrl })
         });
         const data = await res.json();
@@ -2179,7 +2187,10 @@
 
     async function doLogout() {
       try {
-        await fetch('/api/auth/logout', { method: 'POST' });
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'X-CSRF-TOKEN': csrfToken }
+        });
         isAuthenticated = false;
         favoritedUrls.clear();
         currentView = 'all';

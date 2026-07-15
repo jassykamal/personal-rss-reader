@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RssReader;
@@ -35,6 +36,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
+
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+});
 
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddSingleton<FeedService>();
@@ -94,7 +100,7 @@ app.MapPost("/api/feeds", async (AddFeedRequest request, StorageService storage,
     await feedService.RefreshFeedAsync(newFeed);
 
     return Results.Created($"/api/feeds/{newFeed.Id}", newFeed);
-});
+}).DisableAntiforgery();
 
 app.MapDelete("/api/feeds/{id}", (string id, StorageService storage) =>
 {
@@ -108,7 +114,7 @@ app.MapDelete("/api/feeds/{id}", (string id, StorageService storage) =>
     storage.Save(data);
 
     return Results.Ok(new { message = $"'{feed.Title}' and its articles have been removed." });
-});
+}).DisableAntiforgery();
 
 app.MapPost("/api/feeds/{id}/refresh", async (string id, StorageService storage, FeedService feedService) =>
 {
@@ -120,7 +126,7 @@ app.MapPost("/api/feeds/{id}/refresh", async (string id, StorageService storage,
     await feedService.RefreshFeedAsync(feed);
 
     return Results.Ok(new { message = $"'{feed.Title}' has been refreshed." });
-});
+}).DisableAntiforgery();
 
 app.MapGet("/api/articles", (StorageService storage) =>
 {
@@ -177,7 +183,7 @@ app.MapPost("/api/auth/register", async (
     await signInManager.SignInAsync(user, isPersistent: false);
 
     return Results.Ok(new { message = "Account created successfully." });
-});
+}).DisableAntiforgery();
 
 app.MapPost("/api/auth/login", async (
     LoginRequest req,
@@ -203,12 +209,20 @@ app.MapPost("/api/auth/login", async (
         email = user.Email,
         username = user.UserName
     });
-});
+}).DisableAntiforgery();
 
 app.MapPost("/api/auth/logout", async (SignInManager<ApplicationUser> signInManager) =>
 {
     await signInManager.SignOutAsync();
     return Results.Ok(new { message = "Logged out." });
+});
+
+// ── CSRF token endpoint ─────────────────────────────────────
+
+app.MapGet("/api/antiforgery/token", (IAntiforgery antiforgery, HttpContext context) =>
+{
+    var tokens = antiforgery.GetAndStoreTokens(context);
+    return Results.Ok(new { token = tokens.RequestToken });
 });
 
 // ── Favorites endpoints ─────────────────────────────────────────
@@ -309,7 +323,7 @@ app.MapPost("/api/recently-viewed", async (
 
     await db.SaveChangesAsync();
     return Results.Ok(new { recorded = true });
-});
+}).DisableAntiforgery();
 
 app.MapGet("/api/recently-viewed", async (
     ClaimsPrincipal user,
@@ -348,7 +362,7 @@ app.MapPost("/api/history", async (
 
     await db.SaveChangesAsync();
     return Results.Ok(new { recorded = true });
-});
+}).DisableAntiforgery();
 
 app.MapGet("/api/history", async (
     ClaimsPrincipal user,
