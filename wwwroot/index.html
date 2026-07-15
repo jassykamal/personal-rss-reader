@@ -229,6 +229,8 @@
       font-size: 1.1rem;
     }
 
+    .mobile-menu-btn { display: none; }
+
     .lang-button {
       padding: 0 12px;
       min-height: 36px;
@@ -912,17 +914,34 @@
         bottom: 0;
         width: min(320px, 85vw);
         z-index: 4;
-        transform: translateX(calc(-100% + 44px));
+        transform: translateX(-100%);
         transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      [dir="rtl"] .sidebar { transform: translateX(calc(100% - 44px)); }
+      [dir="rtl"] .sidebar { transform: translateX(100%); }
 
       .sidebar.open { transform: translateX(0); }
       [dir="rtl"] .sidebar.open { transform: translateX(0); }
 
       .brand { padding: 15px 18px; }
-      .icon-button { display: inline-flex; }
+      .icon-button { display: none; }
+
+      .mobile-menu-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--soft);
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 1.1rem;
+        flex: 0 0 auto;
+      }
+
+      .mobile-menu-btn:hover { color: var(--brand-hover); border-color: rgba(13, 148, 136, 0.34); }
 
       .sidebar-content {
         display: block;
@@ -1011,6 +1030,7 @@
 
     <main class="main">
       <header class="topbar">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open feeds">☰</button>
         <div class="topbar-copy">
           <h1 class="page-title" data-i18n="allArticles">All articles</h1>
           <p class="page-subtitle" data-i18n="pageSubtitle">Newest stories from every feed, in one calm reading view.</p>
@@ -1147,6 +1167,7 @@
     const languageBtn = document.getElementById('languageBtn');
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.getElementById('menuBtn');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -1157,6 +1178,7 @@
       subscribeBtn.addEventListener('click', addFeed);
       languageBtn.addEventListener('click', toggleLanguage);
       menuBtn.addEventListener('click', toggleSidebar);
+      mobileMenuBtn.addEventListener('click', toggleSidebar);
       sidebarOverlay.addEventListener('click', closeSidebar);
       document.getElementById('themeToggle').addEventListener('click', toggleTheme);
       feedUrlInput.addEventListener('keydown', event => {
