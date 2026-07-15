@@ -2138,17 +2138,12 @@
       if (!isAuthenticated || !url) return;
       const title = card?.querySelector('.article-title')?.textContent || '';
       const feedTitle = card?.querySelector('.article-meta span')?.textContent || '';
+      const img = card?.querySelector('.article-media img');
+      const imageUrl = img?.src || '';
+      const body = JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle, imageUrl });
       try {
-        await fetch('/api/recently-viewed', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle })
-        });
-        await fetch('/api/history', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle })
-        });
+        await fetch('/api/recently-viewed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+        await fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
       } catch { /* ignore */ }
     }
 
