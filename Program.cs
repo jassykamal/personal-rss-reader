@@ -158,7 +158,8 @@ app.MapPost("/api/auth/register", async (
     RegisterRequest req,
     UserManager<ApplicationUser> userManager,
     IEmailService emailService,
-    IConfiguration config) =>
+    IConfiguration config,
+    HttpContext httpContext) =>
 {
     if (string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
         return Results.BadRequest(new { error = "Email and password are required." });
@@ -185,7 +186,7 @@ app.MapPost("/api/auth/register", async (
 
     var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
     var encodedToken = HttpUtility.UrlEncode(token);
-    var baseUrl = config["AppBaseUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
+    var baseUrl = GetBaseUrl(httpContext, config);
     var callbackUrl = $"{baseUrl}/verify-email.html?userId={user.Id}&token={encodedToken}";
 
     var body = $@"<div style='font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px'>
@@ -277,7 +278,8 @@ app.MapPost("/api/auth/resend-confirmation", async (
     LoginRequest req,
     UserManager<ApplicationUser> userManager,
     IEmailService emailService,
-    IConfiguration config) =>
+    IConfiguration config,
+    HttpContext httpContext) =>
 {
     if (string.IsNullOrWhiteSpace(req.Email))
         return Results.BadRequest(new { error = "Email is required." });
@@ -288,7 +290,7 @@ app.MapPost("/api/auth/resend-confirmation", async (
 
     var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
     var encodedToken = HttpUtility.UrlEncode(token);
-    var baseUrl = config["AppBaseUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
+    var baseUrl = GetBaseUrl(httpContext, config);
     var callbackUrl = $"{baseUrl}/verify-email.html?userId={user.Id}&token={encodedToken}";
 
     var body = $@"<div style='font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px'>
@@ -468,6 +470,16 @@ app.MapGet("/api/history", async (
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+static string GetBaseUrl(HttpContext httpContext, IConfiguration config)
+{
+    if (httpContext.Request.Host.HasValue)
+    {
+        var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? httpContext.Request.Scheme;
+        return $"{scheme}://{httpContext.Request.Host}";
+    }
+    return config["AppBaseUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
+}
 
 // Helper for consistent userId access
 static partial class Program
