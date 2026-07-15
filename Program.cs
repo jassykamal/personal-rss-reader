@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Web;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
-    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -44,6 +45,7 @@ builder.Services.AddAntiforgery(options =>
 
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddSingleton<FeedService>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
@@ -155,7 +157,8 @@ app.MapGet("/api/auth/me", (ClaimsPrincipal user) =>
 app.MapPost("/api/auth/register", async (
     RegisterRequest req,
     UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager) =>
+    IEmailService emailService,
+    IConfiguration config) =>
 {
     if (string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
         return Results.BadRequest(new { error = "Email and password are required." });
@@ -180,9 +183,21 @@ app.MapPost("/api/auth/register", async (
         return Results.BadRequest(new { error = errors });
     }
 
-    await signInManager.SignInAsync(user, isPersistent: false);
+    var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+    var encodedToken = HttpUtility.UrlEncode(token);
+    var baseUrl = config["AppBaseUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
+    var callbackUrl = $"{baseUrl}/verify-email.html?userId={user.Id}&token={encodedToken}";
 
-    return Results.Ok(new { message = "Account created successfully." });
+    var body = $@"<div style='font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px'>
+      <h2>Verify your email</h2>
+      <p>Click the button below to verify your email address and activate your RSS Reader account.</p>
+      <a href='{callbackUrl}' style='display:inline-block;padding:12px 24px;background:#0d9488;color:#fff;border-radius:6px;text-decoration:none;font-weight:700'>Verify Email</a>
+      <p style='color:#888;font-size:0.85rem;margin-top:24px'>If you did not create this account, you can ignore this email.</p>
+    </div>";
+
+    await emailService.SendEmailAsync(req.Email, "Verify your RSS Reader account", body);
+
+    return Results.Ok(new { message = "Account created. Please check your email to verify your account." });
 }).DisableAntiforgery();
 
 app.MapPost("/api/auth/login", async (
@@ -196,6 +211,9 @@ app.MapPost("/api/auth/login", async (
     var user = await userManager.FindByEmailAsync(req.Email);
     if (user == null)
         return Results.BadRequest(new { error = "Invalid email or password." });
+
+    if (!user.EmailConfirmed)
+        return Results.BadRequest(new { error = "Please verify your email before signing in. Check your inbox for a verification link." });
 
     var result = await signInManager.PasswordSignInAsync(
         user, req.Password, req.RememberMe, lockoutOnFailure: false);
@@ -224,6 +242,59 @@ app.MapGet("/api/antiforgery/token", (IAntiforgery antiforgery, HttpContext cont
     var tokens = antiforgery.GetAndStoreTokens(context);
     return Results.Ok(new { token = tokens.RequestToken });
 });
+
+// ── Email verification ───────────────────────────────────────
+
+app.MapGet("/api/auth/confirm-email", async (
+    string userId,
+    string token,
+    UserManager<ApplicationUser> userManager) =>
+{
+    if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+        return Results.BadRequest(new { error = "Invalid verification link." });
+
+    var user = await userManager.FindByIdAsync(userId);
+    if (user == null)
+        return Results.BadRequest(new { error = "Invalid verification link." });
+
+    var decodedToken = HttpUtility.UrlDecode(token);
+
+    var result = await userManager.ConfirmEmailAsync(user, decodedToken);
+    if (!result.Succeeded)
+        return Results.BadRequest(new { error = "Verification link is invalid or has expired." });
+
+    return Results.Ok(new { message = "Email verified successfully." });
+});
+
+app.MapPost("/api/auth/resend-confirmation", async (
+    LoginRequest req,
+    UserManager<ApplicationUser> userManager,
+    IEmailService emailService,
+    IConfiguration config) =>
+{
+    if (string.IsNullOrWhiteSpace(req.Email))
+        return Results.BadRequest(new { error = "Email is required." });
+
+    var user = await userManager.FindByEmailAsync(req.Email);
+    if (user == null || user.EmailConfirmed)
+        return Results.Ok(new { message = "If your email is registered and not yet verified, a new verification email has been sent." });
+
+    var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+    var encodedToken = HttpUtility.UrlEncode(token);
+    var baseUrl = config["AppBaseUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
+    var callbackUrl = $"{baseUrl}/verify-email.html?userId={user.Id}&token={encodedToken}";
+
+    var body = $@"<div style='font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px'>
+      <h2>Verify your email</h2>
+      <p>Click the button below to verify your email address and activate your RSS Reader account.</p>
+      <a href='{callbackUrl}' style='display:inline-block;padding:12px 24px;background:#0d9488;color:#fff;border-radius:6px;text-decoration:none;font-weight:700'>Verify Email</a>
+      <p style='color:#888;font-size:0.85rem;margin-top:24px'>If you did not request this, you can ignore this email.</p>
+    </div>";
+
+    await emailService.SendEmailAsync(req.Email, "Verify your RSS Reader account", body);
+
+    return Results.Ok(new { message = "If your email is registered and not yet verified, a new verification email has been sent." });
+}).DisableAntiforgery();
 
 // ── Favorites endpoints ─────────────────────────────────────────
 

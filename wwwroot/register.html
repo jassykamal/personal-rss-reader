@@ -139,6 +139,20 @@
       text-align: center;
     }
 
+    .success-msg {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .success-msg .icon {
+      width: 48px; height: 48px; border-radius: 12px; background: var(--brand-soft);
+      color: var(--brand); display: grid; place-items: center; font-size: 1.4rem; margin: 0 auto 14px;
+    }
+
+    .success-msg h2 { font-size: 1.2rem; margin-bottom: 6px; }
+    .success-msg p { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+
     .hint {
       margin-top: 4px;
       color: var(--subtle);
@@ -199,6 +213,11 @@
       <button type="submit" id="submitBtn">Create account</button>
       <div class="error" id="errorMsg" role="alert"></div>
     </form>
+    <div class="success-msg" id="successMsg">
+      <div class="icon">✉</div>
+      <h2>Check your inbox</h2>
+      <p>A verification email has been sent. Click the link in the email to activate your account, then sign in.</p>
+    </div>
     <div class="footer">
       Already have an account? <a href="login.html">Sign in</a>
     </div>
@@ -246,7 +265,8 @@
 
         const data = await res.json();
         if (res.ok) {
-          window.location.href = '/';
+          document.getElementById('registerForm').style.display = 'none';
+          document.getElementById('successMsg').style.display = 'block';
         } else {
           errorEl.textContent = data.error || 'Registration failed.';
         }
