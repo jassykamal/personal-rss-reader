@@ -2264,11 +2264,13 @@
             </div>
             ${description ? `<p class="podcast-desc" dir="auto">${description}</p>` : ''}
             <div class="podcast-actions">
+              ${audioUrl ? `
               <button class="podcast-play-btn${isPlaying ? ' playing' : ''}" type="button"
                 data-audio-url="${audioUrl}" data-title="${escAttr(episode.title || '')}" data-feed-title="${escAttr(episode.feedTitle || '')}"
                 data-image-url="${imageUrl}" data-episode-url="${url}">
                 <span class="btn-icon">${isPlaying ? '⏸' : '▶'}</span> ${isPlaying ? t('pauseEpisode') : t('playEpisode')}
               </button>
+              ` : ''}
               <button class="favorite-btn${favClass}" type="button" data-url="${url}" title="${t('favorite')}" aria-label="${t('favorite')}">${favClass ? '♥' : '♡'}</button>
               <button class="article-action-btn" type="button" title="${t('shareArticle')}" onclick="shareArticle(event, '${url}', '${shareTitle}')" aria-label="${t('shareArticle')}">↗</button>
               <button class="article-action-btn" type="button" title="${t('copyLink')}" onclick="copyArticleLink(event, '${url}')" aria-label="${t('copyLink')}">⧉</button>
@@ -2692,12 +2694,16 @@
             publishedAt: item.savedAt || item.viewedAt || new Date().toISOString()
           }));
 
-          const isPodcastView = items.some(i => i.contentType === 'Podcast');
-          if (isPodcastView) {
-            articlesContainer.innerHTML = `<div class="podcast-list">${articles.map(renderPodcastCard).join('')}</div>`;
-          } else {
-            articlesContainer.innerHTML = `<div class="articles-grid">${articles.map(renderArticle).join('')}</div>`;
+          const newsItems = articles.filter(a => !a.audioUrl);
+          const podcastItems = articles.filter(a => a.audioUrl);
+          let parts = [];
+          if (podcastItems.length) {
+            parts.push(`<div class="podcast-list">${podcastItems.map(renderPodcastCard).join('')}</div>`);
           }
+          if (newsItems.length) {
+            parts.push(`<div class="articles-grid">${newsItems.map(renderArticle).join('')}</div>`);
+          }
+          articlesContainer.innerHTML = parts.join('');
         } catch {
           articlesContainer.innerHTML = renderState('⚠', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
         }
