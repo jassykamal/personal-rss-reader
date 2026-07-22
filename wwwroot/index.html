@@ -1179,28 +1179,29 @@
 
     /* ── Podcast card ───────────────────────────────────────── */
     .podcast-card {
-      display: flex; gap: 16px; background: var(--panel); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-soft);
+      display: flex; gap: 18px; background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-soft);
       animation: riseIn 280ms ease both; transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
     }
     .podcast-card:hover { transform: translateY(-2px); border-color: rgba(13,148,136,0.28); box-shadow: var(--shadow); }
     .podcast-artwork {
-      width: 100px; height: 100px; border-radius: 8px; overflow: hidden; flex: 0 0 auto;
+      width: 120px; height: 120px; border-radius: 8px; overflow: hidden; flex: 0 0 auto;
       background: var(--soft); position: relative; cursor: pointer;
     }
     .podcast-artwork img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .podcast-artwork-fallback {
       display: grid; place-items: center; width: 100%; height: 100%;
-      font-size: 2rem; font-weight: 900; color: var(--brand-hover); background: var(--soft);
+      font-size: 2.2rem; font-weight: 900; color: var(--brand-hover); background: var(--soft);
+	border-radius: 8px;
     }
     .podcast-play-overlay {
       position: absolute; inset: 0; display: grid; place-items: center;
-      background: rgba(0,0,0,0.18); opacity: 0; transition: opacity 180ms ease; border-radius: 8px;
+      background: rgba(0,0,0,0.22); opacity: 0; transition: opacity 180ms ease; border-radius: 8px;
     }
     .podcast-artwork:hover .podcast-play-overlay { opacity: 1; }
     .podcast-play-overlay .play-icon {
-      width: 36px; height: 36px; border-radius: 50%; background: var(--brand); color: #fff;
-      display: grid; place-items: center; font-size: 0.9rem;
+      width: 40px; height: 40px; border-radius: 50%; background: var(--brand); color: #fff;
+      display: grid; place-items: center; font-size: 1rem;
     }
     .podcast-info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
     .podcast-badge {
@@ -1210,22 +1211,22 @@
     }
     [data-theme="dark"] .podcast-badge { background: rgba(167,139,250,0.15); color: #a78bfa; }
     .podcast-title {
-      font-weight: 850; font-size: 1.02rem; line-height: 1.28; color: var(--text);
+      font-weight: 850; font-size: 1.06rem; line-height: 1.28; color: var(--text);
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
     .podcast-title a { color: inherit; text-decoration: none; }
     .podcast-title a:hover { color: var(--brand); }
-    .podcast-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 0.78rem; color: var(--muted); }
+    .podcast-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 0.8rem; color: var(--muted); }
     .podcast-meta .sep { color: var(--subtle); }
     .podcast-desc {
-      font-size: 0.86rem; line-height: 1.55; color: var(--muted);
+      font-size: 0.88rem; line-height: 1.55; color: var(--muted);
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0;
     }
     .podcast-actions { display: flex; align-items: center; gap: 4px; margin-top: auto; }
     .podcast-play-btn {
-      display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px;
       border: 0; border-radius: 6px; background: var(--brand); color: #fff;
-      font-size: 0.82rem; font-weight: 750; cursor: pointer;
+      font-size: 0.84rem; font-weight: 750; cursor: pointer;
       transition: background 180ms ease, transform 160ms ease;
     }
     .podcast-play-btn:hover { background: var(--brand-hover); transform: translateY(-1px); }
@@ -1311,34 +1312,39 @@
     /* ── Responsive additions ───────────────────────────────── */
     @media (max-width: 980px) {
       .audio-player { padding: 0 8px; }
-      .audio-player-inner { gap: 8px; padding: 6px 0; min-height: 50px; }
-      .audio-player-info { flex: 0 0 120px; }
-      .audio-player-episode { font-size: 0.76rem; }
+      .audio-player-inner { gap: 10px; padding: 6px 0; min-height: 50px; }
+      .audio-player-info { flex: 0 0 130px; }
+      .audio-player-episode { font-size: 0.78rem; }
       .audio-player-volume { display: none; }
+      .audio-player-speed { padding: 3px 6px; font-size: 0.72rem; }
       .dash-stats { grid-template-columns: repeat(2, 1fr); }
-      .podcast-artwork { width: 72px; height: 72px; }
-      .podcast-card { padding: 12px; gap: 12px; }
+      .podcast-artwork { width: 96px; height: 96px; }
+      .podcast-card { padding: 14px; gap: 14px; }
     }
 
     @media (max-width: 680px) {
-      .audio-player-inner { gap: 6px; }
+      .audio-player-inner { gap: 8px; }
       .audio-player-info { flex: 0 0 100px; }
+      .audio-player-episode { font-size: 0.74rem; }
+      .audio-player-feed { font-size: 0.7rem; }
       .audio-player-speed { display: none; }
       .audio-player-btn { width: 30px; height: 30px; font-size: 0.85rem; }
       .audio-player-btn.play-btn { width: 34px; height: 34px; }
       .dash-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
       .dash-stat-card { padding: 14px 12px; }
       .dash-stat-value { font-size: 1.5rem; }
-      .podcast-card { flex-direction: column; align-items: center; text-align: center; }
-      .podcast-artwork { width: 100px; height: 100px; }
-      .podcast-info { align-items: center; }
-      .podcast-actions { justify-content: center; }
+      .podcast-card { flex-direction: row; align-items: flex-start; text-align: left; }
+      .podcast-artwork { width: 84px; height: 84px; flex: 0 0 84px; }
+      .podcast-info { align-items: flex-start; }
+      .podcast-actions { justify-content: flex-start; }
     }
 
     @media (max-width: 480px) {
       .dash-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
       .dash-stat-value { font-size: 1.3rem; }
       .dash-stat-label { font-size: 0.7rem; }
+      .podcast-artwork { width: 72px; height: 72px; flex: 0 0 72px; }
+      .podcast-card { padding: 12px; gap: 10px; }
     }
 
     @media (max-width: 980px) {
@@ -2261,6 +2267,7 @@
       const url = escAttr(episode.url || '#');
       const description = escHtml(episode.description || '');
       const duration = episode.duration ? escHtml(episode.duration) : '';
+      const episodeAuthor = episode.episodeAuthor ? escHtml(episode.episodeAuthor) : '';
       const shareTitle = escAttr(episode.title || '');
       const letter = (episode.feedTitle || 'P').charAt(0).toUpperCase();
       const isPlaying = window._currentAudioUrl === episode.audioUrl;
@@ -2270,7 +2277,7 @@
         <article class="podcast-card" style="--feed-color:${color}" dir="auto">
           <div class="podcast-artwork">
             ${imageUrl
-              ? `<img src="${imageUrl}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;podcast-artwork-fallback&quot;>${letter}</div>'" />`
+              ? `<img src="${imageUrl}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'" /><div class="podcast-artwork-fallback" style="display:none">${letter}</div>`
               : `<div class="podcast-artwork-fallback">${letter}</div>`}
             <div class="podcast-play-overlay">
               <div class="play-icon">▶</div>
@@ -2281,6 +2288,7 @@
             <div class="podcast-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a></div>
             <div class="podcast-meta">
               <span>${feedTitle}</span>
+              ${episodeAuthor ? `<span class="sep" aria-hidden="true">·</span><span>${episodeAuthor}</span>` : ''}
               <span class="sep" aria-hidden="true">·</span>
               <time datetime="${escAttr(episode.publishedAt || '')}">${formatDate(episode.publishedAt)}</time>
               ${duration ? `<span class="sep" aria-hidden="true">·</span><span>${duration}</span>` : ''}

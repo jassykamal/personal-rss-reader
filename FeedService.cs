@@ -307,6 +307,9 @@ public class FeedService
                 !localName.Equals("entry", StringComparison.OrdinalIgnoreCase))
                 continue;
 
+            const int maxEpisodes = 200;
+            if (target.Count >= maxEpisodes) break;
+
             var itemTitle = "";
             var itemLink = "";
             var itemDesc = "";
@@ -362,6 +365,21 @@ public class FeedService
                         else if (encType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
                             itemImage = encUrl;
                     }
+                }
+                else if (cname.Equals("image", StringComparison.OrdinalIgnoreCase) &&
+                         (cns.Contains("itunes", StringComparison.OrdinalIgnoreCase) ||
+                          cns.Contains("podcast", StringComparison.OrdinalIgnoreCase)))
+                {
+                    var href = child.Attribute("href")?.Value?.Trim();
+                    if (!string.IsNullOrWhiteSpace(href) && Uri.TryCreate(href, UriKind.Absolute, out _))
+                        itemImage = href;
+                }
+                else if (cname.Equals("thumbnail", StringComparison.OrdinalIgnoreCase) &&
+                         cns.Contains("media", StringComparison.OrdinalIgnoreCase))
+                {
+                    var url = child.Attribute("url")?.Value?.Trim();
+                    if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out _))
+                        itemImage ??= url;
                 }
                 else if (cname.Equals("duration", StringComparison.OrdinalIgnoreCase) &&
                          cns.Contains("itunes", StringComparison.OrdinalIgnoreCase))
@@ -648,10 +666,19 @@ public class FeedService
 
         var url = PickFirstMediaElement(element, MediaNs + "content")
                ?? PickFirstMediaElement(element, MediaNs + "thumbnail")
+               ?? PickImageHref(element, ItunesNs + "image")
+               ?? PickImageHref(element, PodcastNs + "image")
                ?? PickEnclosureUrl(element)
                ?? PickAtomEnclosureUrl(element);
 
         return url;
+    }
+
+    private static string? PickImageHref(XElement element, XName name)
+    {
+        var el = element.Descendants(name).FirstOrDefault();
+        var href = el?.Attribute("href")?.Value?.Trim();
+        return !string.IsNullOrWhiteSpace(href) && IsAbsoluteUrl(href) ? href : null;
     }
 
     private static string? PickFirstMediaElement(XElement element, XName name)
