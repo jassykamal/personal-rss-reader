@@ -2128,6 +2128,7 @@
           showToast(data.message, 'success');
           await loadFeeds();
           await loadArticles();
+          console.log('[REFRESH] currentView after reload:', currentView);
           if (currentView === 'news') renderFilteredArticles('News');
           else if (currentView === 'podcasts') renderFilteredArticles('Podcast');
           else if (currentView === 'favorites' || currentView === 'recent') switchView(currentView);
@@ -2629,7 +2630,15 @@
     }
 
     async function recordArticleView(url, card) {
-      if (!isAuthenticated || !url) return;
+      console.log('[RECORD-VIEW] Called with URL:', url, 'card:', card?.className);
+      if (!isAuthenticated) {
+        console.log('[RECORD-VIEW] Not authenticated, returning');
+        return;
+      }
+      if (!url) {
+        console.log('[RECORD-VIEW] No URL, returning');
+        return;
+      }
       const isPodcast = !!card?.closest('.podcast-card') || card?.classList?.contains('podcast-card');
       const titleEl = card?.querySelector('.article-title, .podcast-title a, .dash-card-title');
       const feedEl = card?.querySelector('.article-meta span, .podcast-meta span, .dash-card-meta');
@@ -2638,11 +2647,16 @@
       const feedTitle = feedEl?.textContent || '';
       const imageUrl = img?.src || '';
       const contentType = isPodcast ? 'Podcast' : 'News';
+      console.log('[RECORD-VIEW] Extracted:', { title, feedTitle, imageUrl, contentType });
       const body = JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle, imageUrl, contentType });
       try {
-        await fetch('/api/recently-viewed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-        await fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-      } catch { /* ignore */ }
+        const rvRes = await fetch('/api/recently-viewed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+        console.log('[RECORD-VIEW] POST recently-viewed status:', rvRes.status);
+        const hsRes = await fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+        console.log('[RECORD-VIEW] POST history status:', hsRes.status);
+      } catch (e) {
+        console.log('[RECORD-VIEW] Fetch error:', e);
+      }
     }
 
     async function switchView(view) {
@@ -2696,9 +2710,12 @@
 
         try {
           const endpoint = view === 'favorites' ? '/api/favorites' : '/api/recently-viewed';
+          console.log('[SWITCH-VIEW] Fetching:', endpoint);
           const res = await fetch(endpoint);
+          console.log('[SWITCH-VIEW] Response status:', res.status);
           if (!res.ok) throw new Error('Failed');
           const items = await res.json();
+          console.log('[SWITCH-VIEW] Items count:', items.length, 'first item:', items[0]);
 
           if (!items.length) {
             articlesContainer.innerHTML = renderState('◇',

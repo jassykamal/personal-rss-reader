@@ -24,31 +24,63 @@ public class FeedService
 
     public async Task<string?> ValidateFeedAsync(string url)
     {
+        var logger = Console.Out;
+        logger.WriteLine($"[VALIDATE] URL: {url}");
+
         try
         {
             var feed = await FeedReader.ReadAsync(url);
+            logger.WriteLine($"[VALIDATE] FeedReader success. Title='{feed?.Title ?? "(null)"}'");
             if (!string.IsNullOrWhiteSpace(feed?.Title))
                 return feed.Title;
+            logger.WriteLine("[VALIDATE] FeedReader returned null/empty title");
         }
-        catch { /* FeedReader failed, try XML fallback */ }
+        catch (Exception ex)
+        {
+            logger.WriteLine($"[VALIDATE] FeedReader exception: {ex.GetType().Name}: {ex.Message}");
+        }
 
+        logger.WriteLine("[VALIDATE] Falling back to raw XML...");
         return await TryExtractTitleFromXmlAsync(url);
     }
 
     private async Task<string?> TryExtractTitleFromXmlAsync(string url)
     {
+        var logger = Console.Out;
         try
         {
-            var response = await _httpClient.GetStringAsync(url);
-            var xml = XDocument.Parse(response);
+            using var response = await _httpClient.GetAsync(url);
+            logger.WriteLine($"[XML-FALLBACK] HTTP {(int)response.StatusCode} {response.StatusCode}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.WriteLine("[XML-FALLBACK] Non-success status — returning null");
+                return null;
+            }
+
+            var contentType = response.Content.Headers.ContentType?.MediaType ?? "";
+            logger.WriteLine($"[XML-FALLBACK] Content-Type: {contentType}");
+
+            var body = await response.Content.ReadAsStringAsync();
+            logger.WriteLine($"[XML-FALLBACK] Body length: {body.Length} chars");
+            var preview = body.Length > 200 ? body[..200] : body;
+            logger.WriteLine($"[XML-FALLBACK] Body preview: {preview.Replace("\n", "\\n").Replace("\r", "")}");
+
+            var xml = XDocument.Parse(body);
             var root = xml.Root;
-            if (root == null) return null;
+            if (root == null)
+            {
+                logger.WriteLine("[XML-FALLBACK] Root element is null");
+                return null;
+            }
+            logger.WriteLine($"[XML-FALLBACK] Root element: <{root.Name.LocalName}>");
 
             XElement? channel = null;
 
             if (root.Name.LocalName.Equals("feed", StringComparison.OrdinalIgnoreCase))
             {
                 channel = root;
+                logger.WriteLine("[XML-FALLBACK] Using root as Atom <feed>");
             }
             else
             {
@@ -57,27 +89,36 @@ public class FeedService
                     if (el.Name.LocalName.Equals("channel", StringComparison.OrdinalIgnoreCase))
                     {
                         channel = el;
+                        logger.WriteLine("[XML-FALLBACK] Found RSS <channel>");
                         break;
                     }
                 }
             }
 
-            if (channel == null) return null;
+            if (channel == null)
+            {
+                logger.WriteLine("[XML-FALLBACK] No <channel> or <feed> found");
+                return null;
+            }
 
             foreach (var el in channel.Elements())
             {
                 if (el.Name.LocalName.Equals("title", StringComparison.OrdinalIgnoreCase))
                 {
                     var title = el.Value.Trim();
+                    logger.WriteLine($"[XML-FALLBACK] Found title: '{title}'");
                     if (!string.IsNullOrWhiteSpace(title))
                         return title;
+                    logger.WriteLine("[XML-FALLBACK] Title was empty");
                 }
             }
 
+            logger.WriteLine("[XML-FALLBACK] No <title> element found in channel");
             return null;
         }
-        catch
+        catch (Exception ex)
         {
+            logger.WriteLine($"[XML-FALLBACK] Exception: {ex.GetType().Name}: {ex.Message}");
             return null;
         }
     }
@@ -156,8 +197,6 @@ public class FeedService
         }
 
         var data = _storage.Load();
-        data.Articles.RemoveAll(a => a.FeedId == feed.Id);
-
         var feedType = await DetectFeedTypeAsync(feed.Url);
 
         var storedFeed = data.Feeds.FirstOrDefault(f => f.Id == feed.Id);
@@ -167,22 +206,27 @@ public class FeedService
             storedFeed.LastRefreshed = DateTime.UtcNow;
         }
 
+        var newArticles = new List<Article>();
+
         if (parsedFeed != null)
         {
             if (storedFeed != null)
                 storedFeed.Title = parsedFeed.Title ?? storedFeed.Title;
-            PopulateArticlesFromFeedReader(feed, parsedFeed, data, feedType);
+            PopulateArticlesFromFeedReader(feed, parsedFeed, newArticles, feedType);
         }
         else
         {
-            await PopulateArticlesFromRawXmlAsync(feed, data, feedType);
+            await PopulateArticlesFromRawXmlAsync(feed, newArticles, feedType);
         }
+
+        data.Articles.RemoveAll(a => a.FeedId == feed.Id);
+        data.Articles.AddRange(newArticles);
 
         _storage.Save(data);
     }
 
     private void PopulateArticlesFromFeedReader(
-        Feed feed, CodeHollow.FeedReader.Feed parsedFeed, AppData data, FeedType feedType)
+        Feed feed, CodeHollow.FeedReader.Feed parsedFeed, List<Article> target, FeedType feedType)
     {
         foreach (var item in parsedFeed.Items)
         {
@@ -210,12 +254,12 @@ public class FeedService
                 article.EpisodeAuthor = author;
             }
 
-            data.Articles.Add(article);
+            target.Add(article);
         }
     }
 
     private async Task PopulateArticlesFromRawXmlAsync(
-        Feed feed, AppData data, FeedType feedType)
+        Feed feed, List<Article> target, FeedType feedType)
     {
         string xmlText;
         try
@@ -354,7 +398,7 @@ public class FeedService
                 EpisodeAuthor = episodeAuthor
             };
 
-            data.Articles.Add(article);
+            target.Add(article);
         }
     }
 
