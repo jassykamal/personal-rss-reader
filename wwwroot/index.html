@@ -2124,7 +2124,10 @@
           showToast(data.message, 'success');
           await loadFeeds();
           await loadArticles();
-          renderCurrentView();
+          if (currentView === 'news') renderFilteredArticles('News');
+          else if (currentView === 'podcasts') renderFilteredArticles('Podcast');
+          else if (currentView === 'favorites' || currentView === 'recent') switchView(currentView);
+          else if (currentView === 'home') renderDashboard();
         } else {
           showToast(data.error || t('refreshFailed'), 'error');
         }
@@ -2620,9 +2623,9 @@
     async function recordArticleView(url, card) {
       if (!isAuthenticated || !url) return;
       const isPodcast = !!card?.closest('.podcast-card') || card?.classList?.contains('podcast-card');
-      const titleEl = card?.querySelector('.article-title, .podcast-title a');
-      const feedEl = card?.querySelector('.article-meta span, .podcast-meta span');
-      const img = card?.querySelector('.article-media img, .podcast-artwork img');
+      const titleEl = card?.querySelector('.article-title, .podcast-title a, .dash-card-title');
+      const feedEl = card?.querySelector('.article-meta span, .podcast-meta span, .dash-card-meta');
+      const img = card?.querySelector('.article-media img, .podcast-artwork img, .dash-card-img img');
       const title = titleEl?.textContent || '';
       const feedTitle = feedEl?.textContent || '';
       const imageUrl = img?.src || '';

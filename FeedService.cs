@@ -42,14 +42,37 @@ public class FeedService
             var root = xml.Root;
             if (root == null) return null;
 
-            var channel = root.Name.LocalName.Equals("feed", StringComparison.OrdinalIgnoreCase)
-                ? root
-                : root.Element("channel");
+            XElement? channel = null;
+
+            if (root.Name.LocalName.Equals("feed", StringComparison.OrdinalIgnoreCase))
+            {
+                channel = root;
+            }
+            else
+            {
+                foreach (var el in root.Elements())
+                {
+                    if (el.Name.LocalName.Equals("channel", StringComparison.OrdinalIgnoreCase))
+                    {
+                        channel = el;
+                        break;
+                    }
+                }
+            }
 
             if (channel == null) return null;
 
-            var title = channel.Element("title")?.Value?.Trim();
-            return string.IsNullOrWhiteSpace(title) ? null : title;
+            foreach (var el in channel.Elements())
+            {
+                if (el.Name.LocalName.Equals("title", StringComparison.OrdinalIgnoreCase))
+                {
+                    var title = el.Value.Trim();
+                    if (!string.IsNullOrWhiteSpace(title))
+                        return title;
+                }
+            }
+
+            return null;
         }
         catch
         {
