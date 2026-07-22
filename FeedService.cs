@@ -7,12 +7,17 @@ namespace RssReader;
 public class FeedService
 {
     private static readonly XNamespace MediaNs = "http://search.yahoo.com/mrss/";
+    private static readonly XNamespace ItunesNs = "http://www.itunes.com/dtds/podcast-1.0.dtd";
+    private static readonly XNamespace PodcastNs = "https://podcastindex.org/namespace/1.0";
+    private static readonly XNamespace AtomNs = "http://www.w3.org/2005/Atom";
 
     private readonly StorageService _storage;
+    private readonly HttpClient _httpClient;
 
     public FeedService(StorageService storage)
     {
         _storage = storage;
+        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
     }
 
     public async Task<string?> ValidateFeedAsync(string url)
@@ -25,6 +30,59 @@ public class FeedService
         catch
         {
             return null;
+        }
+    }
+
+    public async Task<FeedType> DetectFeedTypeAsync(string url)
+    {
+        try
+        {
+            var response = await _httpClient.GetStringAsync(url);
+            var xml = XDocument.Parse(response);
+            var root = xml.Root;
+            if (root == null) return FeedType.News;
+
+            var nsAttrs = root.Attributes()
+                .Where(a => a.IsNamespaceDeclaration)
+                .Select(a => a.Value)
+                .ToList();
+
+            var hasItunesNs = nsAttrs.Any(v =>
+                v.Contains("itunes.com", StringComparison.OrdinalIgnoreCase) ||
+                v.Contains("itunes.dtd", StringComparison.OrdinalIgnoreCase));
+
+            var hasPodcastNs = nsAttrs.Any(v =>
+                v.Contains("podcastindex.org", StringComparison.OrdinalIgnoreCase));
+
+            var hasAudioEnclosure = root.Descendants("enclosure").Any(e =>
+            {
+                var type = e.Attribute("type")?.Value ?? "";
+                return type.StartsWith("audio/", StringComparison.OrdinalIgnoreCase);
+            });
+
+            var hasItunesElements = root.Descendants().Any(d =>
+            {
+                var ns = d.Name.NamespaceName;
+                return ns.Contains("itunes.com", StringComparison.OrdinalIgnoreCase) ||
+                       ns.Contains("itunes.dtd", StringComparison.OrdinalIgnoreCase);
+            });
+
+            var hasMediaAudio = root.Descendants(MediaNs + "content").Any(e =>
+            {
+                var type = e.Attribute("type")?.Value ?? "";
+                var medium = e.Attribute("medium")?.Value ?? "";
+                return type.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ||
+                       medium.Equals("audio", StringComparison.OrdinalIgnoreCase);
+            });
+
+            if (hasItunesNs || hasPodcastNs || hasAudioEnclosure || hasItunesElements || hasMediaAudio)
+                return FeedType.Podcast;
+
+            return FeedType.News;
+        }
+        catch
+        {
+            return FeedType.News;
         }
     }
 
@@ -44,6 +102,26 @@ public class FeedService
         var data = _storage.Load();
         data.Articles.RemoveAll(a => a.FeedId == feed.Id);
 
+        var feedType = await DetectFeedTypeAsync(feed.Url);
+
+        var storedFeed = data.Feeds.FirstOrDefault(f => f.Id == feed.Id);
+        if (storedFeed != null)
+        {
+            storedFeed.FeedType = feedType;
+            storedFeed.LastRefreshed = DateTime.UtcNow;
+            storedFeed.Title = parsedFeed.Title ?? storedFeed.Title;
+        }
+
+        if (feedType == FeedType.Podcast)
+        {
+            ExtractPodcastFeedMetadata(feed, parsedFeed);
+            if (storedFeed != null)
+            {
+                storedFeed.Author = feed.Author;
+                storedFeed.ArtworkUrl = feed.ArtworkUrl;
+            }
+        }
+
         foreach (var item in parsedFeed.Items)
         {
             if (string.IsNullOrWhiteSpace(item.Title) && string.IsNullOrWhiteSpace(item.Link))
@@ -61,14 +139,133 @@ public class FeedService
                 ImageUrl    = ExtractImageUrl(item, rawContent),
                 PublishedAt = item.PublishingDate?.ToUniversalTime() ?? DateTime.UtcNow
             };
+
+            if (feedType == FeedType.Podcast)
+            {
+                var (audioUrl, duration, author) = ExtractPodcastEpisodeMetadata(item);
+                article.AudioUrl = audioUrl;
+                article.Duration = duration;
+                article.EpisodeAuthor = author;
+            }
+
             data.Articles.Add(article);
         }
 
-        var storedFeed = data.Feeds.FirstOrDefault(f => f.Id == feed.Id);
-        if (storedFeed != null)
-            storedFeed.LastRefreshed = DateTime.UtcNow;
-
         _storage.Save(data);
+    }
+
+    private static void ExtractPodcastFeedMetadata(Feed feed, CodeHollow.FeedReader.Feed parsedFeed)
+    {
+        if (parsedFeed.SpecificFeed?.Element != null)
+        {
+            var element = parsedFeed.SpecificFeed.Element;
+            feed.Author ??= PickFirstElementValue(element, ItunesNs + "author")
+                         ?? PickFirstElementValue(element, ItunesNs + "owner")
+                         ?? PickFirstElementValue(element, ItunesNs + "name");
+
+            feed.ArtworkUrl ??= PickFirstImageHref(element, ItunesNs + "image")
+                             ?? PickFirstImageHref(element, PodcastNs + "image");
+
+            if (feed.ArtworkUrl == null && parsedFeed.ImageUrl != null)
+                feed.ArtworkUrl = parsedFeed.ImageUrl;
+        }
+    }
+
+    private static (string? AudioUrl, string? Duration, string? Author) ExtractPodcastEpisodeMetadata(FeedItem item)
+    {
+        string? audioUrl = null;
+        string? duration = null;
+        string? author = null;
+
+        if (item.SpecificItem != null)
+        {
+            var element = item.SpecificItem.Element;
+            if (element != null)
+            {
+                audioUrl = ExtractAudioEnclosure(item)
+                        ?? PickFirstEnclosureAudio(element)
+                        ?? PickMediaAudio(element);
+
+                duration = PickFirstElementValue(element, ItunesNs + "duration")
+                        ?? PickFirstElementValue(element, PodcastNs + "duration");
+
+                author = PickFirstElementValue(element, ItunesNs + "author");
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(audioUrl))
+        {
+            audioUrl = ExtractAudioEnclosure(item);
+        }
+
+        return (audioUrl, duration, author);
+    }
+
+    private static string? ExtractAudioEnclosure(FeedItem item)
+    {
+        var si = item.SpecificItem;
+        if (si == null) return null;
+
+        CodeHollow.FeedReader.Feeds.FeedItemEnclosure? enclosure = null;
+
+        if (si is CodeHollow.FeedReader.Feeds.Rss20FeedItem rss20)
+            enclosure = rss20.Enclosure;
+        else if (si is CodeHollow.FeedReader.Feeds.Rss092FeedItem rss092)
+            enclosure = rss092.Enclosure;
+        else if (si is CodeHollow.FeedReader.Feeds.MediaRssFeedItem media)
+            enclosure = media.Enclosure;
+
+        if (enclosure?.Url == null) return null;
+        if (!IsAbsoluteUrl(enclosure.Url)) return null;
+
+        var mime = enclosure.MediaType ?? "";
+        if (mime.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) || mime.Length == 0)
+            return enclosure.Url;
+
+        return null;
+    }
+
+    private static string? PickFirstEnclosureAudio(XElement element)
+    {
+        foreach (var enc in element.Descendants("enclosure"))
+        {
+            var type = enc.Attribute("type")?.Value ?? "";
+            if (type.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
+            {
+                var url = System.Net.WebUtility.HtmlDecode(enc.Attribute("url")?.Value?.Trim() ?? "");
+                if (IsAbsoluteUrl(url)) return url;
+            }
+        }
+        return null;
+    }
+
+    private static string? PickMediaAudio(XElement element)
+    {
+        foreach (var media in element.Descendants(MediaNs + "content"))
+        {
+            var medium = media.Attribute("medium")?.Value ?? "";
+            var type = media.Attribute("type")?.Value ?? "";
+            if (medium.Equals("audio", StringComparison.OrdinalIgnoreCase) ||
+                type.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
+            {
+                var url = System.Net.WebUtility.HtmlDecode(media.Attribute("url")?.Value?.Trim() ?? "");
+                if (IsAbsoluteUrl(url)) return url;
+            }
+        }
+        return null;
+    }
+
+    private static string? PickFirstElementValue(XElement parent, XName name)
+    {
+        var el = parent.Descendants(name).FirstOrDefault();
+        return el?.Value?.Trim();
+    }
+
+    private static string? PickFirstImageHref(XElement parent, XName name)
+    {
+        var el = parent.Descendants(name).FirstOrDefault();
+        var href = el?.Attribute("href")?.Value?.Trim();
+        return !string.IsNullOrWhiteSpace(href) && IsAbsoluteUrl(href) ? href : null;
     }
 
     private static string StripHtml(string html)

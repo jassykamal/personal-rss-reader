@@ -59,6 +59,23 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+
+    MigrateDatabase(db);
+}
+
+static void MigrateDatabase(AppDbContext db)
+{
+    var migrations = new[]
+    {
+        "ALTER TABLE FavoriteArticles ADD COLUMN ContentType TEXT NULL",
+        "ALTER TABLE RecentlyViewedArticles ADD COLUMN ContentType TEXT NULL",
+        "ALTER TABLE ReadingHistories ADD COLUMN ContentType TEXT NULL"
+    };
+
+    foreach (var sql in migrations)
+    {
+        try { db.Database.ExecuteSqlRaw(sql); } catch { /* column already exists */ }
+    }
 }
 
 app.UseCors();
@@ -89,12 +106,14 @@ app.MapPost("/api/feeds", async (AddFeedRequest request, StorageService storage,
     if (title == null)
         return Results.BadRequest(new { error = "Could not read this URL as an RSS/Atom feed." });
 
+    var feedType = await feedService.DetectFeedTypeAsync(url);
+
     var data = storage.Load();
 
     if (data.Feeds.Any(f => f.Url.Equals(url, StringComparison.OrdinalIgnoreCase)))
         return Results.BadRequest(new { error = "You are already subscribed to this feed." });
 
-    var newFeed = new Feed { Url = url, Title = title };
+    var newFeed = new Feed { Url = url, Title = title, FeedType = feedType };
     data.Feeds.Add(newFeed);
     storage.Save(data);
 
@@ -129,13 +148,64 @@ app.MapPost("/api/feeds/{id}/refresh", async (string id, StorageService storage,
     return Results.Ok(new { message = $"'{feed.Title}' has been refreshed." });
 }).DisableAntiforgery();
 
-app.MapGet("/api/articles", (StorageService storage) =>
+app.MapGet("/api/articles", (StorageService storage, string? contentType) =>
 {
     var data = storage.Load();
-    var articles = data.Articles
+    var articles = data.Articles.AsEnumerable();
+
+    if (!string.IsNullOrWhiteSpace(contentType))
+    {
+        var typeFeeds = data.Feeds
+            .Where(f => f.FeedType.ToString().Equals(contentType, StringComparison.OrdinalIgnoreCase))
+            .Select(f => f.Id)
+            .ToHashSet();
+        articles = articles.Where(a => typeFeeds.Contains(a.FeedId));
+    }
+
+    var result = articles
         .OrderByDescending(a => a.PublishedAt)
         .ToList();
-    return Results.Ok(articles);
+    return Results.Ok(result);
+});
+
+// ── Dashboard stats ──────────────────────────────────────────
+
+app.MapGet("/api/dashboard/stats", (StorageService storage) =>
+{
+    var data = storage.Load();
+    var newsFeeds = data.Feeds.Count(f => f.FeedType == FeedType.News || f.FeedType == FeedType.Unspecified);
+    var podcastFeeds = data.Feeds.Count(f => f.FeedType == FeedType.Podcast);
+
+    var newsFeedIds = data.Feeds
+        .Where(f => f.FeedType == FeedType.News || f.FeedType == FeedType.Unspecified)
+        .Select(f => f.Id)
+        .ToHashSet();
+    var podcastFeedIds = data.Feeds
+        .Where(f => f.FeedType == FeedType.Podcast)
+        .Select(f => f.Id)
+        .ToHashSet();
+
+    var latestNews = data.Articles
+        .Where(a => newsFeedIds.Contains(a.FeedId))
+        .OrderByDescending(a => a.PublishedAt)
+        .Take(5)
+        .ToList();
+
+    var latestPodcasts = data.Articles
+        .Where(a => podcastFeedIds.Contains(a.FeedId))
+        .OrderByDescending(a => a.PublishedAt)
+        .Take(5)
+        .ToList();
+
+    return Results.Ok(new
+    {
+        feedCount = data.Feeds.Count,
+        newsFeedCount = newsFeeds,
+        podcastFeedCount = podcastFeeds,
+        articleCount = data.Articles.Count,
+        latestNews,
+        latestPodcasts
+    });
 });
 
 // ── Auth endpoints ──────────────────────────────────────────────
@@ -268,6 +338,7 @@ app.MapPost("/api/favorites", async (
         ArticleTitle = req.ArticleTitle,
         FeedTitle = req.FeedTitle,
         ImageUrl = req.ImageUrl,
+        ContentType = req.ContentType,
         SavedAt = DateTime.UtcNow
     });
 
@@ -308,6 +379,7 @@ app.MapPost("/api/recently-viewed", async (
         existing.ArticleTitle = req.ArticleTitle;
         existing.FeedTitle = req.FeedTitle;
         existing.ImageUrl = req.ImageUrl;
+        existing.ContentType = req.ContentType;
     }
     else
     {
@@ -318,6 +390,7 @@ app.MapPost("/api/recently-viewed", async (
             ArticleTitle = req.ArticleTitle,
             FeedTitle = req.FeedTitle,
             ImageUrl = req.ImageUrl,
+            ContentType = req.ContentType,
             ViewedAt = DateTime.UtcNow
         });
     }
@@ -358,6 +431,7 @@ app.MapPost("/api/history", async (
         ArticleUrl = req.ArticleUrl,
         ArticleTitle = req.ArticleTitle,
         FeedTitle = req.FeedTitle,
+        ContentType = req.ContentType,
         ReadAt = DateTime.UtcNow
     });
 

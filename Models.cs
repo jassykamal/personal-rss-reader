@@ -3,6 +3,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace RssReader;
 
+public enum FeedType
+{
+    Unspecified = 0,
+    News = 1,
+    Podcast = 2
+}
+
 public class ApplicationUser : IdentityUser { }
 
 public class FavoriteArticle
@@ -14,6 +21,7 @@ public class FavoriteArticle
     public string ArticleTitle { get; set; } = string.Empty;
     public string FeedTitle { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
+    public string? ContentType { get; set; }
     public DateTime SavedAt { get; set; } = DateTime.UtcNow;
 }
 
@@ -26,6 +34,7 @@ public class RecentlyViewedArticle
     public string ArticleTitle { get; set; } = string.Empty;
     public string FeedTitle { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
+    public string? ContentType { get; set; }
     public DateTime ViewedAt { get; set; } = DateTime.UtcNow;
 }
 
@@ -37,6 +46,7 @@ public class ReadingHistory
     public string ArticleUrl { get; set; } = string.Empty;
     public string ArticleTitle { get; set; } = string.Empty;
     public string FeedTitle { get; set; } = string.Empty;
+    public string? ContentType { get; set; }
     public DateTime ReadAt { get; set; } = DateTime.UtcNow;
 }
 
@@ -59,6 +69,7 @@ public class FavoriteRequest
     public string ArticleTitle { get; set; } = string.Empty;
     public string FeedTitle { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
+    public string? ContentType { get; set; }
 }
 
 public class ViewArticleRequest
@@ -67,6 +78,7 @@ public class ViewArticleRequest
     public string ArticleTitle { get; set; } = string.Empty;
     public string FeedTitle { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
+    public string? ContentType { get; set; }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -89,6 +101,14 @@ public class Feed
 
     // When we last fetched new articles (null = never refreshed yet)
     public DateTime? LastRefreshed { get; set; }
+
+    // The type of content this feed provides
+    public FeedType FeedType { get; set; } = FeedType.Unspecified;
+
+    // Podcast-specific fields
+    public string? Author { get; set; }
+
+    public string? ArtworkUrl { get; set; }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -118,6 +138,13 @@ public class Article
 
     // When the article was published
     public DateTime PublishedAt { get; set; }
+
+    // Podcast episode fields
+    public string? AudioUrl { get; set; }
+
+    public string? Duration { get; set; }
+
+    public string? EpisodeAuthor { get; set; }
 }
 
 // ─────────────────────────────────────────────────────────────
