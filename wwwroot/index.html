@@ -2086,6 +2086,10 @@
           switchView('news');
         }
         selectedFeedId = feedId;
+        renderFeedList();
+        const ct = feed?.feedType === 2 ? 'Podcast' : 'News';
+        renderFilteredArticles(ct);
+        closeSidebar();
         return;
       }
       renderFeedList();
