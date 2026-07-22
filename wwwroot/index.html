@@ -1138,6 +1138,209 @@
       }
     }
 
+    /* ── Dashboard ──────────────────────────────────────────── */
+    .dashboard { max-width: 1180px; margin: 0 auto; }
+    .dash-welcome { margin-bottom: 28px; }
+    .dash-welcome h2 { margin: 0 0 4px; font-size: 1.5rem; font-weight: 850; }
+    .dash-welcome p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    .dash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .dash-stat-card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 20px 18px; box-shadow: var(--shadow-soft); transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+    .dash-stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .dash-stat-value { display: block; font-size: 2rem; font-weight: 900; line-height: 1.1; color: var(--brand); }
+    .dash-stat-label { display: block; margin-top: 4px; font-size: 0.78rem; font-weight: 750; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .dash-section { margin-bottom: 32px; }
+    .dash-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .dash-section-title { font-size: 1.08rem; font-weight: 850; color: var(--text); margin: 0; }
+    .dash-view-all {
+      display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; border: 1px solid var(--line);
+      border-radius: 6px; background: var(--soft); color: var(--muted); font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; text-decoration: none; transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+    }
+    .dash-view-all:hover { background: var(--panel); color: var(--brand); border-color: rgba(13,148,136,0.34); }
+    .dash-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+    .dash-card {
+      display: flex; gap: 14px; background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow-soft);
+      transition: transform 160ms ease, box-shadow 160ms ease; cursor: pointer; align-items: center;
+    }
+    .dash-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: rgba(13,148,136,0.2); }
+    .dash-card-img {
+      width: 56px; height: 56px; border-radius: 6px; object-fit: cover; flex: 0 0 auto;
+      background: var(--soft); display: grid; place-items: center; color: var(--brand-hover); font-size: 1.3rem; font-weight: 900;
+    }
+    .dash-card-img img { width: 56px; height: 56px; border-radius: 6px; object-fit: cover; display: block; }
+    .dash-card-body { min-width: 0; flex: 1; }
+    .dash-card-title { display: block; font-weight: 750; font-size: 0.88rem; line-height: 1.3; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .dash-card-meta { display: block; margin-top: 3px; font-size: 0.76rem; color: var(--subtle); }
+    .dash-empty { text-align: center; color: var(--muted); padding: 28px; font-size: 0.9rem; }
+
+    /* ── Podcast card ───────────────────────────────────────── */
+    .podcast-card {
+      display: flex; gap: 16px; background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-soft);
+      animation: riseIn 280ms ease both; transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+    .podcast-card:hover { transform: translateY(-2px); border-color: rgba(13,148,136,0.28); box-shadow: var(--shadow); }
+    .podcast-artwork {
+      width: 100px; height: 100px; border-radius: 8px; overflow: hidden; flex: 0 0 auto;
+      background: var(--soft); position: relative; cursor: pointer;
+    }
+    .podcast-artwork img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .podcast-artwork-fallback {
+      display: grid; place-items: center; width: 100%; height: 100%;
+      font-size: 2rem; font-weight: 900; color: var(--brand-hover); background: var(--soft);
+    }
+    .podcast-play-overlay {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      background: rgba(0,0,0,0.18); opacity: 0; transition: opacity 180ms ease; border-radius: 8px;
+    }
+    .podcast-artwork:hover .podcast-play-overlay { opacity: 1; }
+    .podcast-play-overlay .play-icon {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--brand); color: #fff;
+      display: grid; place-items: center; font-size: 0.9rem;
+    }
+    .podcast-info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .podcast-badge {
+      display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px;
+      border-radius: 999px; background: rgba(139, 92, 246, 0.10); color: #7c3aed;
+      font-size: 0.72rem; font-weight: 750; white-space: nowrap; align-self: flex-start;
+    }
+    [data-theme="dark"] .podcast-badge { background: rgba(167,139,250,0.15); color: #a78bfa; }
+    .podcast-title {
+      font-weight: 850; font-size: 1.02rem; line-height: 1.28; color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .podcast-title a { color: inherit; text-decoration: none; }
+    .podcast-title a:hover { color: var(--brand); }
+    .podcast-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 0.78rem; color: var(--muted); }
+    .podcast-meta .sep { color: var(--subtle); }
+    .podcast-desc {
+      font-size: 0.86rem; line-height: 1.55; color: var(--muted);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0;
+    }
+    .podcast-actions { display: flex; align-items: center; gap: 4px; margin-top: auto; }
+    .podcast-play-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+      border: 0; border-radius: 6px; background: var(--brand); color: #fff;
+      font-size: 0.82rem; font-weight: 750; cursor: pointer;
+      transition: background 180ms ease, transform 160ms ease;
+    }
+    .podcast-play-btn:hover { background: var(--brand-hover); transform: translateY(-1px); }
+    .podcast-play-btn.playing { background: var(--accent); }
+    .podcast-play-btn .btn-icon { font-size: 0.9rem; }
+
+    /* ── Audio Player Bar ───────────────────────────────────── */
+    .audio-player {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: var(--panel); border-top: 1px solid var(--line); box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+      transform: translateY(100%); transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 0 24px 0 0;
+    }
+    .audio-player.visible { transform: translateY(0); }
+    .audio-player.visible ~ .toast { bottom: 70px; }
+    body:has(.audio-player.visible) .articles-scroll { padding-bottom: 90px; }
+    .audio-player-inner {
+      display: flex; align-items: center; gap: 16px; max-width: 1180px; margin: 0 auto;
+      padding: 8px 0; min-height: 56px;
+    }
+    .audio-player-artwork {
+      width: 48px; height: 48px; border-radius: 6px; overflow: hidden; flex: 0 0 auto;
+      background: var(--soft); display: grid; place-items: center; font-size: 1.2rem;
+      font-weight: 900; color: var(--brand-hover);
+    }
+    .audio-player-artwork img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .audio-player-info { min-width: 0; flex: 0 0 180px; }
+    .audio-player-episode { font-weight: 750; font-size: 0.84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+    .audio-player-feed { font-size: 0.74rem; color: var(--subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .audio-player-controls { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .audio-player-btn {
+      width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--soft); color: var(--text);
+      cursor: pointer; font-size: 1rem; display: grid; place-items: center; flex: 0 0 auto;
+      transition: background 140ms ease, color 140ms ease;
+    }
+    .audio-player-btn:hover { background: var(--line); color: var(--brand); }
+    .audio-player-btn.play-btn { width: 40px; height: 40px; background: var(--brand); color: #fff; }
+    .audio-player-btn.play-btn:hover { background: var(--brand-hover); }
+    .audio-player-progress { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    .audio-player-time { font-size: 0.74rem; color: var(--subtle); font-variant-numeric: tabular-nums; min-width: 38px; text-align: center; }
+    .audio-player-seek {
+      flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+      background: var(--line); outline: 0; cursor: pointer;
+    }
+    .audio-player-seek::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%;
+      background: var(--brand); cursor: pointer; box-shadow: 0 0 0 3px rgba(13,148,136,0.2);
+    }
+    .audio-player-speed {
+      font-size: 0.74rem; font-weight: 750; padding: 4px 8px; border: 1px solid var(--line);
+      border-radius: 4px; background: var(--soft); color: var(--muted); cursor: pointer;
+      transition: background 140ms ease, color 140ms ease;
+    }
+    .audio-player-speed:hover { background: var(--line); color: var(--text); }
+    .audio-player-volume { display: flex; align-items: center; gap: 6px; }
+    .audio-player-volume-slider {
+      width: 70px; -webkit-appearance: none; appearance: none; height: 3px; border-radius: 2px;
+      background: var(--line); outline: 0; cursor: pointer;
+    }
+    .audio-player-volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%;
+      background: var(--brand); cursor: pointer;
+    }
+    .audio-player-close {
+      width: 32px; height: 32px; border: 0; border-radius: 6px; background: transparent;
+      color: var(--muted); cursor: pointer; font-size: 1rem; display: grid; place-items: center;
+      transition: background 140ms ease, color 140ms ease;
+    }
+    .audio-player-close:hover { background: var(--line); color: var(--text); }
+
+    /* ── Podcast list ───────────────────────────────────────── */
+    .podcast-list { display: grid; gap: 10px; }
+    .podcast-list .article-card { display: none; }
+
+    /* ── Feed section header ────────────────────────────────── */
+    .feed-section-title {
+      display: flex; align-items: center; gap: 8px; padding: 6px 0 4px; margin-top: 6px;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--subtle);
+    }
+    .feed-section-title + .feed-section-title { margin-top: 14px; }
+
+    /* ── Responsive additions ───────────────────────────────── */
+    @media (max-width: 980px) {
+      .audio-player { padding: 0 8px; }
+      .audio-player-inner { gap: 8px; padding: 6px 0; min-height: 50px; }
+      .audio-player-info { flex: 0 0 120px; }
+      .audio-player-episode { font-size: 0.76rem; }
+      .audio-player-volume { display: none; }
+      .dash-stats { grid-template-columns: repeat(2, 1fr); }
+      .podcast-artwork { width: 72px; height: 72px; }
+      .podcast-card { padding: 12px; gap: 12px; }
+    }
+
+    @media (max-width: 680px) {
+      .audio-player-inner { gap: 6px; }
+      .audio-player-info { flex: 0 0 100px; }
+      .audio-player-speed { display: none; }
+      .audio-player-btn { width: 30px; height: 30px; font-size: 0.85rem; }
+      .audio-player-btn.play-btn { width: 34px; height: 34px; }
+      .dash-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .dash-stat-card { padding: 14px 12px; }
+      .dash-stat-value { font-size: 1.5rem; }
+      .podcast-card { flex-direction: column; align-items: center; text-align: center; }
+      .podcast-artwork { width: 100px; height: 100px; }
+      .podcast-info { align-items: center; }
+      .podcast-actions { justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+      .dash-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
+      .dash-stat-value { font-size: 1.3rem; }
+      .dash-stat-label { font-size: 0.7rem; }
+    }
+
     @media (max-width: 980px) {
       body { overflow: auto; }
       body.sidebar-open { overflow: hidden; }
@@ -1256,7 +1459,9 @@
         </section>
 
         <nav class="app-nav" id="appNav" aria-label="Views">
-          <div class="nav-item active" data-view="all" id="navAll" role="button" tabindex="0"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span data-i18n="navAll">All Articles</span></div>
+          <div class="nav-item active" data-view="home" id="navHome" role="button" tabindex="0"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span data-i18n="navHome">Home</span></div>
+          <div class="nav-item" data-view="news" id="navNews" role="button" tabindex="0"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span data-i18n="navNews">News</span></div>
+          <div class="nav-item" data-view="podcasts" id="navPodcasts" role="button" tabindex="0"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/><path d="M12 22v-4"/></svg></span><span data-i18n="navPodcasts">Podcasts</span></div>
           <div class="nav-item" data-view="favorites" id="navFavorites" role="button" tabindex="0"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span><span data-i18n="navFavorites">Favorites</span></div>
           <div class="nav-item" data-view="recent" id="navRecent" role="button" tabindex="0"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span data-i18n="navRecent">Recently Viewed</span></div>
         </nav>
@@ -1310,6 +1515,31 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="audio-player" id="audioPlayer">
+    <div class="audio-player-inner">
+      <div class="audio-player-artwork" id="playerArtwork">♪</div>
+      <div class="audio-player-info">
+        <div class="audio-player-episode" id="playerEpisode">-</div>
+        <div class="audio-player-feed" id="playerFeed">-</div>
+      </div>
+      <div class="audio-player-controls">
+        <button class="audio-player-btn play-btn" id="playerPlayBtn" type="button" aria-label="Play">▶</button>
+        <div class="audio-player-progress">
+          <span class="audio-player-time" id="playerCurrent">0:00</span>
+          <input type="range" class="audio-player-seek" id="playerSeek" min="0" max="100" value="0" step="0.1" aria-label="Seek" />
+          <span class="audio-player-time" id="playerTotal">0:00</span>
+        </div>
+      </div>
+      <button class="audio-player-speed" id="playerSpeedBtn" type="button" title="Playback speed">1x</button>
+      <div class="audio-player-volume">
+        <button class="audio-player-btn" id="playerVolumeBtn" type="button" aria-label="Mute" style="font-size:0.85rem">🔊</button>
+        <input type="range" class="audio-player-volume-slider" id="playerVolume" min="0" max="100" value="85" aria-label="Volume" />
+      </div>
+      <button class="audio-player-close" id="playerCloseBtn" type="button" aria-label="Close player">✕</button>
+    </div>
+    <audio id="audioElement" preload="metadata" style="display:none"></audio>
+  </div>
 
   <script>
     const API_BASE = '';
@@ -1388,12 +1618,33 @@
         logout: 'Logout',
         loggedOut: 'Logged out',
         navAll: 'All Articles',
+        navHome: 'Home',
+        navNews: 'News',
+        navPodcasts: 'Podcasts',
         navFavorites: 'Favorites',
         navRecent: 'Recently Viewed',
+        welcomeTitle: 'Welcome back',
+        welcomeSubtitle: 'Here\'s what\'s new in your feeds today.',
+        newsFeeds: 'News feeds',
+        podcastFeeds: 'Podcast feeds',
+        totalArticles: 'Total articles',
+        latestNews: 'Latest News',
+        latestPodcasts: 'Latest Episodes',
+        viewAll: 'View All',
+        podcastBadge: 'Podcast',
+        playEpisode: 'Play',
+        pauseEpisode: 'Pause',
+        noPodcastEpisodes: 'No podcast episodes yet',
+        noPodcastEpisodesMsg: 'Subscribe to a podcast feed and episodes will appear here.',
+        nowPlaying: 'Now Playing',
         noFavorites: 'No favorites yet',
         noFavoritesMessage: 'Click the ♡ button on any article to save it here.',
         noRecent: 'No recently viewed',
-        noRecentMessage: 'Articles you read will appear here.'
+        noRecentMessage: 'Articles you read will appear here.',
+        noNewsFeeds: 'No news feeds yet',
+        noNewsFeedsMsg: 'Add an RSS or Atom news feed to see articles here.',
+        noPodcastFeeds: 'No podcast feeds yet',
+        noPodcastFeedsMsg: 'Add a podcast RSS feed to see episodes here.'
       },
       ar: {
         appName: 'قارئ RSS الشخصي',
@@ -1462,12 +1713,33 @@
         logout: 'تسجيل الخروج',
         loggedOut: 'تم تسجيل الخروج',
         navAll: 'كل المقالات',
+        navHome: 'الرئيسية',
+        navNews: 'أخبار',
+        navPodcasts: 'بودكاست',
         navFavorites: 'المفضلة',
         navRecent: 'شوهدت مؤخرا',
+        welcomeTitle: 'مرحبا بعودتك',
+        welcomeSubtitle: 'إليك أحدث ما في مصادرك اليوم.',
+        newsFeeds: 'مصادر الأخبار',
+        podcastFeeds: 'مصادر البودكاست',
+        totalArticles: 'إجمالي المقالات',
+        latestNews: 'آخر الأخبار',
+        latestPodcasts: 'آخر الحلقات',
+        viewAll: 'عرض الكل',
+        podcastBadge: 'بودكاست',
+        playEpisode: 'تشغيل',
+        pauseEpisode: 'إيقاف',
+        noPodcastEpisodes: 'لا توجد حلقات بودكاست',
+        noPodcastEpisodesMsg: 'اشترك في مصدر بودكاست وستظهر الحلقات هنا.',
+        nowPlaying: 'قيد التشغيل',
         noFavorites: 'لا توجد مفضلة',
         noFavoritesMessage: 'انقر على زر ♡ في أي مقال لحفظه هنا.',
         noRecent: 'لا توجد مقالات مشاهد',
-        noRecentMessage: 'المقالات التي تقرأها ستظهر هنا.'
+        noRecentMessage: 'المقالات التي تقرأها ستظهر هنا.',
+        noNewsFeeds: 'لا توجد مصادر أخبار',
+        noNewsFeedsMsg: 'أضف مصدر أخبار RSS أو Atom لرؤية المقالات هنا.',
+        noPodcastFeeds: 'لا توجد مصادر بودكاست',
+        noPodcastFeedsMsg: 'أضف مصدر بودكاست RSS لرؤية الحلقات هنا.'
       }
     };
 
@@ -1480,7 +1752,7 @@
     let sortOrder = 'newest';
     let isAuthenticated = false;
     let favoritedUrls = new Set();
-    let currentView = 'all';
+    let currentView = 'home';
     let csrfToken = '';
     let locale = localStorage.getItem('rss-reader-locale') || 'en';
     let toastTimer;
@@ -1543,9 +1815,20 @@
           return;
         }
 
-        const readLink = event.target.closest('.read-link');
+        const readLink = event.target.closest('.read-link, .podcast-title a');
         if (readLink) {
-          recordArticleView(readLink.href, readLink.closest('.article-card'));
+          recordArticleView(readLink.href, readLink.closest('.article-card') || readLink.closest('.podcast-card'));
+        }
+
+        const podcastPlay = event.target.closest('.podcast-play-btn');
+        if (podcastPlay) {
+          event.preventDefault();
+          const url = podcastPlay.dataset.audioUrl;
+          const title = podcastPlay.dataset.title;
+          const feedTitle = podcastPlay.dataset.feedTitle;
+          const imageUrl = podcastPlay.dataset.imageUrl;
+          const episodeUrl = podcastPlay.dataset.episodeUrl;
+          toggleAudioPlayback(url, title, feedTitle, imageUrl, episodeUrl, podcastPlay);
         }
       });
 
@@ -1577,6 +1860,9 @@
         if (!pill) return;
         setDateFilter(pill.dataset.filter);
       });
+
+      initAudioPlayer();
+      switchView('home');
     });
 
     async function addFeed() {
@@ -1645,26 +1931,106 @@
     }
 
     async function loadArticles() {
-      articlesContainer.innerHTML = articleSkeletons();
-
       try {
         const res = await fetch(`${API_BASE}/api/articles`);
         articlesCache = await res.json();
-        updateFilteredCount(articlesCache.length);
         updateStats();
-        if (currentView === 'all') {
-          renderFilteredArticles();
-        }
       } catch {
         articlesContainer.innerHTML = renderState('◇', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
       }
     }
 
-    function renderFilteredArticles() {
+    function renderDashboard() {
+      articlesContainer.innerHTML = articleSkeletons();
+
+      fetch(`${API_BASE}/api/dashboard/stats`)
+        .then(res => res.json())
+        .then(data => {
+          const newsCount = data.newsFeedCount || 0;
+          const podcastCount = data.podcastFeedCount || 0;
+          const totalArticles = data.articleCount || 0;
+          const latestNews = data.latestNews || [];
+          const latestPodcasts = data.latestPodcasts || [];
+          const email = window._authEmail || '';
+
+          let html = '<div class="dashboard">';
+
+          html += '<div class="dash-welcome">';
+          html += `<h2>${isAuthenticated && email ? escHtml(email.split('@')[0]) + ', ' : ''}${t('welcomeTitle')}</h2>`;
+          html += `<p>${t('welcomeSubtitle')}</p>`;
+          html += '</div>';
+
+          html += '<div class="dash-stats">';
+          html += `<div class="dash-stat-card"><span class="dash-stat-value">${newsCount}</span><span class="dash-stat-label">${t('newsFeeds')}</span></div>`;
+          html += `<div class="dash-stat-card"><span class="dash-stat-value">${podcastCount}</span><span class="dash-stat-label">${t('podcastFeeds')}</span></div>`;
+          html += `<div class="dash-stat-card"><span class="dash-stat-value">${totalArticles}</span><span class="dash-stat-label">${t('totalArticles')}</span></div>`;
+          html += '</div>';
+
+          html += '<div class="dash-section">';
+          html += '<div class="dash-section-header">';
+          html += `<h3 class="dash-section-title">${t('latestNews')}</h3>`;
+          html += `<button class="dash-view-all" onclick="switchView('news')">${t('viewAll')} →</button>`;
+          html += '</div>';
+          if (latestNews.length) {
+            html += `<div class="dash-cards">${latestNews.map(a => renderDashCard(a)).join('')}</div>`;
+          } else {
+            html += `<div class="dash-empty">${t('noFavoritesMessage')}</div>`;
+          }
+          html += '</div>';
+
+          html += '<div class="dash-section">';
+          html += '<div class="dash-section-header">';
+          html += `<h3 class="dash-section-title">${t('latestPodcasts')}</h3>`;
+          html += `<button class="dash-view-all" onclick="switchView('podcasts')">${t('viewAll')} →</button>`;
+          html += '</div>';
+          if (latestPodcasts.length) {
+            html += `<div class="dash-cards">${latestPodcasts.map(a => renderDashCard(a)).join('')}</div>`;
+          } else {
+            html += `<div class="dash-empty">${t('noPodcastEpisodesMsg')}</div>`;
+          }
+          html += '</div>';
+
+          html += '</div>';
+          articlesContainer.innerHTML = html;
+          updateFilteredCount(0);
+        })
+        .catch(() => {
+          articlesContainer.innerHTML = renderState('◇', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
+        });
+    }
+
+    function renderDashCard(article) {
+      const imageUrl = article.imageUrl ? escAttr(article.imageUrl) : '';
+      const title = escHtml(article.title || '');
+      const feedTitle = escHtml(article.feedTitle || '');
+      const url = escAttr(article.url || '#');
+      const letter = (article.feedTitle || 'N').charAt(0).toUpperCase();
+
+      return `
+        <div class="dash-card" onclick="window.open('${url}', '_blank')" role="link" tabindex="0">
+          <div class="dash-card-img">
+            ${imageUrl ? `<img src="${imageUrl}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='${letter}'" />` : letter}
+          </div>
+          <div class="dash-card-body">
+            <span class="dash-card-title">${title}</span>
+            <span class="dash-card-meta">${feedTitle} · ${formatDate(article.publishedAt)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFilteredArticles(contentType) {
       let articles = [...articlesCache];
 
       if (selectedFeedId) {
         articles = articles.filter(a => a.feedId === selectedFeedId);
+      }
+
+      if (contentType) {
+        const typeFeeds = feedsCache
+          .filter(f => f.feedType === contentType || (contentType === 'News' && f.feedType === 0))
+          .map(f => f.id);
+        articles = articles.filter(a => typeFeeds.includes(a.feedId));
       }
 
       if (searchQuery) {
@@ -1697,17 +2063,38 @@
           ? renderState('◇', t('searchNoResults'), t('searchNoResultsMessage'))
           : selectedFeedId
             ? renderState('◇', t('noFeedArticlesTitle'), t('noFeedArticlesMessage'))
-            : renderState('◇', t('emptyArticlesTitle'), t('emptyArticlesMessage'));
+            : contentType === 'Podcast'
+              ? renderState('◇', t('noPodcastEpisodes'), t('noPodcastEpisodesMsg'))
+              : renderState('◇', t('emptyArticlesTitle'), t('emptyArticlesMessage'));
         return;
       }
 
-      articlesContainer.innerHTML = `<div class="articles-grid">${articles.map(renderArticle).join('')}</div>`;
+      if (contentType === 'Podcast') {
+        articlesContainer.innerHTML = `<div class="podcast-list">${articles.map(renderPodcastCard).join('')}</div>`;
+      } else {
+        articlesContainer.innerHTML = `<div class="articles-grid">${articles.map(renderArticle).join('')}</div>`;
+      }
     }
 
     function selectFeed(feedId) {
       selectedFeedId = (selectedFeedId === feedId) ? null : feedId;
+      if (currentView === 'home' && feedId) {
+        const feed = feedsCache.find(f => f.id === feedId);
+        if (feed && feed.feedType === 2) {
+          switchView('podcasts');
+        } else {
+          switchView('news');
+        }
+        selectedFeedId = feedId;
+        return;
+      }
       renderFeedList();
-      renderFilteredArticles();
+      const ct = currentView === 'podcasts' ? 'Podcast' : currentView === 'news' ? 'News' : null;
+      if (currentView === 'news' || currentView === 'podcasts') {
+        renderFilteredArticles(ct);
+      } else if (currentView === 'home') {
+        renderFilteredArticles(null);
+      }
       closeSidebar();
     }
 
@@ -1778,7 +2165,23 @@
     }
 
     function renderFeedList() {
-      feedList.innerHTML = feedsCache.map((feed, index) => renderFeed(feed, index)).join('');
+      let feeds = [...feedsCache];
+
+      if (currentView === 'news') {
+        feeds = feeds.filter(f => f.feedType === 0 || f.feedType === 1);
+        if (!feeds.length) {
+          feedList.innerHTML = `<div class="empty-mini"><strong>${t('noNewsFeeds')}</strong><br>${t('noNewsFeedsMsg')}</div>`;
+          return;
+        }
+      } else if (currentView === 'podcasts') {
+        feeds = feeds.filter(f => f.feedType === 2);
+        if (!feeds.length) {
+          feedList.innerHTML = `<div class="empty-mini"><strong>${t('noPodcastFeeds')}</strong><br>${t('noPodcastFeedsMsg')}</div>`;
+          return;
+        }
+      }
+
+      feedList.innerHTML = feeds.map((feed, index) => renderFeed(feed, index)).join('');
     }
 
     function renderArticle(article, index) {
@@ -1816,6 +2219,55 @@
                 <button class="article-action-btn" type="button" title="${t('shareArticle')}" onclick="shareArticle(event, '${url}', '${shareTitle}')" aria-label="${t('shareArticle')}">↗</button>
                 <button class="article-action-btn" type="button" title="${t('copyLink')}" onclick="copyArticleLink(event, '${url}')" aria-label="${t('copyLink')}">⧉</button>
               </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderPodcastCard(episode, index) {
+      const color = getFeedColor(episode.feedId);
+      const imageUrl = episode.imageUrl ? escAttr(episode.imageUrl) : '';
+      const audioUrl = escAttr(episode.audioUrl || '');
+      const title = escHtml(episode.title || '');
+      const feedTitle = escHtml(episode.feedTitle || '');
+      const url = escAttr(episode.url || '#');
+      const description = escHtml(episode.description || '');
+      const duration = episode.duration ? escHtml(episode.duration) : '';
+      const shareTitle = escAttr(episode.title || '');
+      const letter = (episode.feedTitle || 'P').charAt(0).toUpperCase();
+      const isPlaying = window._currentAudioUrl === episode.audioUrl;
+      const favClass = favoritedUrls.has(episode.url || '') ? ' favorited' : '';
+
+      return `
+        <article class="podcast-card" style="--feed-color:${color}" dir="auto">
+          <div class="podcast-artwork">
+            ${imageUrl
+              ? `<img src="${imageUrl}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;podcast-artwork-fallback&quot;>${letter}</div>'" />`
+              : `<div class="podcast-artwork-fallback">${letter}</div>`}
+            <div class="podcast-play-overlay">
+              <div class="play-icon">▶</div>
+            </div>
+          </div>
+          <div class="podcast-info">
+            <span class="podcast-badge" aria-hidden="true">🎙 ${t('podcastBadge')}</span>
+            <div class="podcast-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a></div>
+            <div class="podcast-meta">
+              <span>${feedTitle}</span>
+              <span class="sep" aria-hidden="true">·</span>
+              <time datetime="${escAttr(episode.publishedAt || '')}">${formatDate(episode.publishedAt)}</time>
+              ${duration ? `<span class="sep" aria-hidden="true">·</span><span>${duration}</span>` : ''}
+            </div>
+            ${description ? `<p class="podcast-desc" dir="auto">${description}</p>` : ''}
+            <div class="podcast-actions">
+              <button class="podcast-play-btn${isPlaying ? ' playing' : ''}" type="button"
+                data-audio-url="${audioUrl}" data-title="${escAttr(episode.title || '')}" data-feed-title="${escAttr(episode.feedTitle || '')}"
+                data-image-url="${imageUrl}" data-episode-url="${url}">
+                <span class="btn-icon">${isPlaying ? '⏸' : '▶'}</span> ${isPlaying ? t('pauseEpisode') : t('playEpisode')}
+              </button>
+              <button class="favorite-btn${favClass}" type="button" data-url="${url}" title="${t('favorite')}" aria-label="${t('favorite')}">${favClass ? '♥' : '♡'}</button>
+              <button class="article-action-btn" type="button" title="${t('shareArticle')}" onclick="shareArticle(event, '${url}', '${shareTitle}')" aria-label="${t('shareArticle')}">↗</button>
+              <button class="article-action-btn" type="button" title="${t('copyLink')}" onclick="copyArticleLink(event, '${url}')" aria-label="${t('copyLink')}">⧉</button>
             </div>
           </div>
         </article>
@@ -1988,7 +2440,7 @@
       searchTimer = setTimeout(() => {
         searchQuery = searchInput.value.trim();
         searchBar.classList.toggle('has-value', !!searchQuery);
-        renderFilteredArticles();
+        renderCurrentView();
       }, 250);
     }
 
@@ -1996,7 +2448,7 @@
       searchInput.value = '';
       searchQuery = '';
       searchBar.classList.remove('has-value');
-      renderFilteredArticles();
+      renderCurrentView();
       searchInput.focus();
     }
 
@@ -2004,7 +2456,7 @@
       dateFilter = filter;
       const pills = filterGroup.querySelectorAll('.filter-pill');
       pills.forEach(p => p.classList.toggle('active', p.dataset.filter === filter));
-      renderFilteredArticles();
+      renderCurrentView();
     }
 
     function toggleSort() {
@@ -2012,7 +2464,13 @@
       sortBtn.classList.toggle('desc', sortOrder === 'oldest');
       sortBtn.textContent = sortOrder === 'newest' ? '↓' : '↑';
       sortBtn.title = sortOrder === 'newest' ? t('sortNewest') : t('sortOldest');
-      renderFilteredArticles();
+      renderCurrentView();
+    }
+
+    function renderCurrentView() {
+      if (currentView === 'news') renderFilteredArticles('News');
+      else if (currentView === 'podcasts') renderFilteredArticles('Podcast');
+      else if (currentView === 'home') { /* no-op */ }
     }
 
     function updateFilteredCount(count) {
@@ -2103,11 +2561,13 @@
       }
 
       const url = btn.dataset.url;
-      const card = btn.closest('.article-card');
-      const title = card?.querySelector('.article-title')?.textContent || '';
-      const feedTitle = card?.querySelector('.article-meta span')?.textContent || '';
-      const img = card?.querySelector('.article-media img');
+      const card = btn.closest('.article-card') || btn.closest('.podcast-card');
+      const isPodcast = !!btn.closest('.podcast-card');
+      const title = card?.querySelector('.article-title, .podcast-title a')?.textContent || '';
+      const feedTitle = card?.querySelector('.article-meta span, .podcast-meta span')?.textContent || '';
+      const img = card?.querySelector('.article-media img, .podcast-artwork img');
       const imageUrl = img?.src || '';
+      const contentType = isPodcast ? 'Podcast' : 'News';
 
       const wasFav = favoritedUrls.has(url);
 
@@ -2118,7 +2578,7 @@
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': csrfToken
           },
-          body: JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle, imageUrl })
+          body: JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle, imageUrl, contentType })
         });
         const data = await res.json();
         if (data.favorited) {
@@ -2139,11 +2599,15 @@
 
     async function recordArticleView(url, card) {
       if (!isAuthenticated || !url) return;
-      const title = card?.querySelector('.article-title')?.textContent || '';
-      const feedTitle = card?.querySelector('.article-meta span')?.textContent || '';
-      const img = card?.querySelector('.article-media img');
+      const isPodcast = !!card?.closest('.podcast-card') || card?.classList?.contains('podcast-card');
+      const titleEl = card?.querySelector('.article-title, .podcast-title a');
+      const feedEl = card?.querySelector('.article-meta span, .podcast-meta span');
+      const img = card?.querySelector('.article-media img, .podcast-artwork img');
+      const title = titleEl?.textContent || '';
+      const feedTitle = feedEl?.textContent || '';
       const imageUrl = img?.src || '';
-      const body = JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle, imageUrl });
+      const contentType = isPodcast ? 'Podcast' : 'News';
+      const body = JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle, imageUrl, contentType });
       try {
         await fetch('/api/recently-viewed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
         await fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
@@ -2152,48 +2616,87 @@
 
     async function switchView(view) {
       currentView = view;
+      selectedFeedId = null;
       document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
 
-      if (view === 'all') {
-        renderFilteredArticles();
+      const searchToolbar = document.getElementById('searchToolbar');
+      const pageTitle = document.querySelector('.page-title');
+      const pageSubtitle = document.querySelector('.page-subtitle');
+
+      if (view === 'home') {
+        searchToolbar.style.display = 'none';
+        pageTitle.textContent = t('appName');
+        pageSubtitle.textContent = t('appSubtitle');
+        renderFeedList();
+        renderDashboard();
         return;
       }
 
-      if (!isAuthenticated) {
-        showToast(t('signInRequired'), '');
-        renderFilteredArticles();
-        return;
+      searchToolbar.style.display = 'flex';
+
+      if (view === 'news') {
+        pageTitle.textContent = t('navNews');
+        pageSubtitle.textContent = t('pageSubtitle');
+      } else if (view === 'podcasts') {
+        pageTitle.textContent = t('navPodcasts');
+        pageSubtitle.textContent = t('noPodcastEpisodesMsg');
+      } else if (view === 'favorites') {
+        pageTitle.textContent = t('favorites');
+        pageSubtitle.textContent = '';
+      } else if (view === 'recent') {
+        pageTitle.textContent = t('navRecent');
+        pageSubtitle.textContent = '';
       }
 
-      articlesContainer.innerHTML = articleSkeletons();
+      renderFeedList();
 
-      try {
-        const endpoint = view === 'favorites' ? '/api/favorites' : '/api/recently-viewed';
-        const res = await fetch(endpoint);
-        if (!res.ok) throw new Error('Failed');
-        const items = await res.json();
-
-        if (!items.length) {
-          articlesContainer.innerHTML = renderState('◇',
-            view === 'favorites' ? t('noFavorites') : t('noRecent'),
-            view === 'favorites' ? t('noFavoritesMessage') : t('noRecentMessage'));
+      if (view === 'news') {
+        renderFilteredArticles('News');
+      } else if (view === 'podcasts') {
+        renderFilteredArticles('Podcast');
+      } else if (view === 'favorites' || view === 'recent') {
+        if (!isAuthenticated) {
+          showToast(t('signInRequired'), '');
+          switchView('home');
           return;
         }
 
-        const articles = items.map(item => ({
-          id: item.articleUrl,
-          feedId: '',
-          feedTitle: item.feedTitle,
-          title: item.articleTitle,
-          url: item.articleUrl,
-          description: '',
-          imageUrl: item.imageUrl || null,
-          publishedAt: item.savedAt || item.viewedAt || new Date().toISOString()
-        }));
+        articlesContainer.innerHTML = articleSkeletons();
 
-        articlesContainer.innerHTML = `<div class="articles-grid">${articles.map(renderArticle).join('')}</div>`;
-      } catch {
-        articlesContainer.innerHTML = renderState('⚠', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
+        try {
+          const endpoint = view === 'favorites' ? '/api/favorites' : '/api/recently-viewed';
+          const res = await fetch(endpoint);
+          if (!res.ok) throw new Error('Failed');
+          const items = await res.json();
+
+          if (!items.length) {
+            articlesContainer.innerHTML = renderState('◇',
+              view === 'favorites' ? t('noFavorites') : t('noRecent'),
+              view === 'favorites' ? t('noFavoritesMessage') : t('noRecentMessage'));
+            return;
+          }
+
+          const articles = items.map(item => ({
+            id: item.articleUrl,
+            feedId: '',
+            feedTitle: item.feedTitle,
+            title: item.articleTitle,
+            url: item.articleUrl,
+            description: '',
+            imageUrl: item.imageUrl || null,
+            audioUrl: item.contentType === 'Podcast' ? item.articleUrl : null,
+            publishedAt: item.savedAt || item.viewedAt || new Date().toISOString()
+          }));
+
+          const isPodcastView = items.some(i => i.contentType === 'Podcast');
+          if (isPodcastView) {
+            articlesContainer.innerHTML = `<div class="podcast-list">${articles.map(renderPodcastCard).join('')}</div>`;
+          } else {
+            articlesContainer.innerHTML = `<div class="articles-grid">${articles.map(renderArticle).join('')}</div>`;
+          }
+        } catch {
+          articlesContainer.innerHTML = renderState('⚠', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
+        }
       }
     }
 
@@ -2205,16 +2708,157 @@
         });
         isAuthenticated = false;
         favoritedUrls.clear();
-        currentView = 'all';
+        currentView = 'home';
         window._authEmail = '';
         renderAuthArea();
         userAvatar.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === 'all'));
-        renderFilteredArticles();
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === 'home'));
+      renderCurrentView();
         showToast(t('loggedOut'), 'success');
       } catch {
         showToast(t('networkError'), 'error');
       }
+    }
+
+    // ── Audio Player ───────────────────────────────────────────
+
+    window._currentAudioUrl = null;
+    window._currentAudioElement = null;
+
+    function initAudioPlayer() {
+      const audio = document.getElementById('audioElement');
+      const playBtn = document.getElementById('playerPlayBtn');
+      const seekBar = document.getElementById('playerSeek');
+      const volumeSlider = document.getElementById('playerVolume');
+      const volumeBtn = document.getElementById('playerVolumeBtn');
+      const speedBtn = document.getElementById('playerSpeedBtn');
+      const closeBtn = document.getElementById('playerCloseBtn');
+      const player = document.getElementById('audioPlayer');
+      const currentTime = document.getElementById('playerCurrent');
+      const totalTime = document.getElementById('playerTotal');
+
+      playBtn.addEventListener('click', () => {
+        if (audio.paused) audio.play(); else audio.pause();
+      });
+
+      audio.addEventListener('play', () => { playBtn.textContent = '⏸'; });
+      audio.addEventListener('pause', () => { playBtn.textContent = '▶'; });
+      audio.addEventListener('ended', () => { playBtn.textContent = '▶'; closePlayer(); });
+
+      audio.addEventListener('timeupdate', () => {
+        currentTime.textContent = formatTime(audio.currentTime);
+        if (audio.duration && isFinite(audio.duration)) {
+          seekBar.value = (audio.currentTime / audio.duration) * 100;
+          totalTime.textContent = formatTime(audio.duration);
+        }
+      });
+
+      audio.addEventListener('loadedmetadata', () => {
+        if (audio.duration && isFinite(audio.duration)) {
+          totalTime.textContent = formatTime(audio.duration);
+        }
+      });
+
+      seekBar.addEventListener('input', () => {
+        if (audio.duration && isFinite(audio.duration)) {
+          audio.currentTime = (seekBar.value / 100) * audio.duration;
+        }
+      });
+
+      volumeSlider.addEventListener('input', () => {
+        audio.volume = volumeSlider.value / 100;
+      });
+
+      volumeBtn.addEventListener('click', () => {
+        audio.muted = !audio.muted;
+        volumeBtn.textContent = audio.muted ? '🔇' : '🔊';
+      });
+
+      speedBtn.addEventListener('click', () => {
+        const speeds = [1, 1.25, 1.5, 2, 0.75];
+        const current = parseFloat(speedBtn.textContent);
+        const idx = speeds.indexOf(current);
+        const next = speeds[(idx + 1) % speeds.length];
+        audio.playbackRate = next;
+        speedBtn.textContent = next + 'x';
+      });
+
+      closeBtn.addEventListener('click', closePlayer);
+    }
+
+    function toggleAudioPlayback(audioUrl, title, feedTitle, imageUrl, episodeUrl, button) {
+      const audio = document.getElementById('audioElement');
+      const player = document.getElementById('audioPlayer');
+
+      if (window._currentAudioUrl === audioUrl && !audio.paused) {
+        audio.pause();
+        updatePlayButtons(null);
+        return;
+      }
+
+      if (window._currentAudioUrl !== audioUrl) {
+        window._currentAudioUrl = audioUrl;
+        window._currentAudioElement = audio;
+        audio.src = audioUrl;
+        audio.load();
+        updatePlayerInfo(title, feedTitle, imageUrl);
+      }
+
+      audio.play().catch(() => {
+        showToast('Could not play this episode.', 'error');
+      });
+      player.classList.add('visible');
+      updatePlayButtons(audioUrl);
+    }
+
+    function updatePlayerInfo(title, feedTitle, imageUrl) {
+      document.getElementById('playerEpisode').textContent = title || '-';
+      document.getElementById('playerFeed').textContent = feedTitle || '-';
+      const artwork = document.getElementById('playerArtwork');
+      const letter = (feedTitle || 'P').charAt(0).toUpperCase();
+      if (imageUrl) {
+        artwork.innerHTML = `<img src="${escAttr(imageUrl)}" alt="" onerror="this.parentElement.textContent='${letter}'" />`;
+      } else {
+        artwork.textContent = letter;
+      }
+    }
+
+    function updatePlayButtons(activeUrl) {
+      document.querySelectorAll('.podcast-play-btn').forEach(btn => {
+        const isActive = btn.dataset.audioUrl === activeUrl && activeUrl != null;
+        btn.classList.toggle('playing', isActive);
+        const icon = btn.querySelector('.btn-icon');
+        if (icon) icon.textContent = isActive ? '⏸' : '▶';
+        const isThisPlaying = isActive && !document.getElementById('audioElement').paused;
+        btn.innerHTML = btn.innerHTML.replace(
+          isThisPlaying ? t('playEpisode') : t('pauseEpisode'),
+          ''
+        );
+        if (isThisPlaying) {
+          btn.innerHTML = btn.innerHTML.replace(t('playEpisode'), t('pauseEpisode'));
+        }
+      });
+    }
+
+    function closePlayer() {
+      const audio = document.getElementById('audioElement');
+      audio.pause();
+      audio.src = '';
+      window._currentAudioUrl = null;
+      document.getElementById('audioPlayer').classList.remove('visible');
+      document.getElementById('playerEpisode').textContent = '-';
+      document.getElementById('playerFeed').textContent = '-';
+      document.getElementById('playerCurrent').textContent = '0:00';
+      document.getElementById('playerTotal').textContent = '0:00';
+      document.getElementById('playerSeek').value = 0;
+      updatePlayButtons(null);
+    }
+
+    function formatTime(seconds) {
+      if (!isFinite(seconds) || seconds < 0) return '0:00';
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return m + ':' + s.toString().padStart(2, '0');
     }
 
     function t(key, values = {}) {
