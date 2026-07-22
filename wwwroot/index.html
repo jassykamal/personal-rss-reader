@@ -1830,6 +1830,15 @@
           const episodeUrl = podcastPlay.dataset.episodeUrl;
           toggleAudioPlayback(url, title, feedTitle, imageUrl, episodeUrl, podcastPlay);
         }
+
+        const dashCard = event.target.closest('.dash-card');
+        if (dashCard) {
+          const url = dashCard.dataset.url;
+          if (url) {
+            recordArticleView(url, dashCard);
+            window.open(url, '_blank');
+          }
+        }
       });
 
       document.getElementById('appNav').addEventListener('click', event => {
@@ -2007,7 +2016,7 @@
       const letter = (article.feedTitle || 'N').charAt(0).toUpperCase();
 
       return `
-        <div class="dash-card" onclick="window.open('${url}', '_blank')" role="link" tabindex="0">
+        <div class="dash-card" data-url="${url}" role="link" tabindex="0">
           <div class="dash-card-img">
             ${imageUrl ? `<img src="${imageUrl}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='${letter}'" />` : letter}
           </div>
@@ -2027,8 +2036,9 @@
       }
 
       if (contentType) {
+        const typeVal = contentType === 'News' ? 1 : contentType === 'Podcast' ? 2 : 0;
         const typeFeeds = feedsCache
-          .filter(f => f.feedType === contentType || (contentType === 'News' && f.feedType === 0))
+          .filter(f => f.feedType === typeVal || (contentType === 'News' && f.feedType === 0))
           .map(f => f.id);
         articles = articles.filter(a => typeFeeds.includes(a.feedId));
       }
@@ -2114,6 +2124,7 @@
           showToast(data.message, 'success');
           await loadFeeds();
           await loadArticles();
+          renderCurrentView();
         } else {
           showToast(data.error || t('refreshFailed'), 'error');
         }
@@ -2476,7 +2487,10 @@
     function renderCurrentView() {
       if (currentView === 'news') renderFilteredArticles('News');
       else if (currentView === 'podcasts') renderFilteredArticles('Podcast');
-      else if (currentView === 'home') { /* no-op */ }
+      else if (currentView === 'home') renderDashboard();
+      else if (currentView === 'favorites' || currentView === 'recent') {
+        switchView(currentView);
+      }
     }
 
     function updateFilteredCount(count) {

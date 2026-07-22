@@ -29,6 +29,30 @@ public class FeedService
         }
         catch
         {
+            return await TryExtractTitleFromXmlAsync(url);
+        }
+    }
+
+    private async Task<string?> TryExtractTitleFromXmlAsync(string url)
+    {
+        try
+        {
+            var response = await _httpClient.GetStringAsync(url);
+            var xml = XDocument.Parse(response);
+            var root = xml.Root;
+            if (root == null) return null;
+
+            var channel = root.Name.LocalName.Equals("feed", StringComparison.OrdinalIgnoreCase)
+                ? root
+                : root.Element("channel");
+
+            if (channel == null) return null;
+
+            var title = channel.Element("title")?.Value?.Trim();
+            return string.IsNullOrWhiteSpace(title) ? null : title;
+        }
+        catch
+        {
             return null;
         }
     }
