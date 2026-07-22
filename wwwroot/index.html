@@ -2151,6 +2151,10 @@
           showToast(data.message, 'success');
           await loadFeeds();
           await loadArticles();
+          if (currentView === 'news') renderFilteredArticles('News');
+          else if (currentView === 'podcasts') renderFilteredArticles('Podcast');
+          else if (currentView === 'favorites' || currentView === 'recent') switchView(currentView);
+          else if (currentView === 'home') renderDashboard();
         } else {
           showToast(data.error || t('removeFailed'), 'error');
         }
