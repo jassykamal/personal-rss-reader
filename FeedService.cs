@@ -18,6 +18,8 @@ public class FeedService
     {
         _storage = storage;
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "RssReader/1.0");
+        _httpClient.DefaultRequestHeaders.Add("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml, */*");
     }
 
     public async Task<string?> ValidateFeedAsync(string url)
@@ -25,12 +27,12 @@ public class FeedService
         try
         {
             var feed = await FeedReader.ReadAsync(url);
-            return string.IsNullOrWhiteSpace(feed?.Title) ? null : feed.Title;
+            if (!string.IsNullOrWhiteSpace(feed?.Title))
+                return feed.Title;
         }
-        catch
-        {
-            return await TryExtractTitleFromXmlAsync(url);
-        }
+        catch { /* FeedReader failed, try XML fallback */ }
+
+        return await TryExtractTitleFromXmlAsync(url);
     }
 
     private async Task<string?> TryExtractTitleFromXmlAsync(string url)
@@ -101,8 +103,10 @@ public class FeedService
             var hasPodcastNs = nsAttrs.Any(v =>
                 v.Contains("podcastindex.org", StringComparison.OrdinalIgnoreCase));
 
-            var hasAudioEnclosure = root.Descendants("enclosure").Any(e =>
+            var hasAudioEnclosure = root.Descendants().Any(e =>
             {
+                if (!e.Name.LocalName.Equals("enclosure", StringComparison.OrdinalIgnoreCase))
+                    return false;
                 var type = e.Attribute("type")?.Value ?? "";
                 return type.StartsWith("audio/", StringComparison.OrdinalIgnoreCase);
             });
@@ -114,8 +118,13 @@ public class FeedService
                        ns.Contains("itunes.dtd", StringComparison.OrdinalIgnoreCase);
             });
 
-            var hasMediaAudio = root.Descendants(MediaNs + "content").Any(e =>
+            var hasMediaAudio = root.Descendants().Any(e =>
             {
+                if (!e.Name.LocalName.Equals("content", StringComparison.OrdinalIgnoreCase))
+                    return false;
+                if (!e.Name.NamespaceName.Contains("mrss", StringComparison.OrdinalIgnoreCase) &&
+                    !e.Name.NamespaceName.Contains("yahoo", StringComparison.OrdinalIgnoreCase))
+                    return false;
                 var type = e.Attribute("type")?.Value ?? "";
                 var medium = e.Attribute("medium")?.Value ?? "";
                 return type.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ||
@@ -135,7 +144,7 @@ public class FeedService
 
     public async Task RefreshFeedAsync(Feed feed)
     {
-        CodeHollow.FeedReader.Feed parsedFeed;
+        CodeHollow.FeedReader.Feed? parsedFeed = null;
 
         try
         {
@@ -143,7 +152,7 @@ public class FeedService
         }
         catch
         {
-            return;
+            /* FeedReader failed — use raw XML fallback below */
         }
 
         var data = _storage.Load();
@@ -156,19 +165,25 @@ public class FeedService
         {
             storedFeed.FeedType = feedType;
             storedFeed.LastRefreshed = DateTime.UtcNow;
-            storedFeed.Title = parsedFeed.Title ?? storedFeed.Title;
         }
 
-        if (feedType == FeedType.Podcast)
+        if (parsedFeed != null)
         {
-            ExtractPodcastFeedMetadata(feed, parsedFeed);
             if (storedFeed != null)
-            {
-                storedFeed.Author = feed.Author;
-                storedFeed.ArtworkUrl = feed.ArtworkUrl;
-            }
+                storedFeed.Title = parsedFeed.Title ?? storedFeed.Title;
+            PopulateArticlesFromFeedReader(feed, parsedFeed, data, feedType);
+        }
+        else
+        {
+            await PopulateArticlesFromRawXmlAsync(feed, data, feedType);
         }
 
+        _storage.Save(data);
+    }
+
+    private void PopulateArticlesFromFeedReader(
+        Feed feed, CodeHollow.FeedReader.Feed parsedFeed, AppData data, FeedType feedType)
+    {
         foreach (var item in parsedFeed.Items)
         {
             if (string.IsNullOrWhiteSpace(item.Title) && string.IsNullOrWhiteSpace(item.Link))
@@ -197,8 +212,150 @@ public class FeedService
 
             data.Articles.Add(article);
         }
+    }
 
-        _storage.Save(data);
+    private async Task PopulateArticlesFromRawXmlAsync(
+        Feed feed, AppData data, FeedType feedType)
+    {
+        string xmlText;
+        try
+        {
+            xmlText = await _httpClient.GetStringAsync(feed.Url);
+        }
+        catch
+        {
+            return;
+        }
+
+        var xml = XDocument.Parse(xmlText);
+        var root = xml.Root;
+        if (root == null) return;
+
+        var isAtom = root.Name.LocalName.Equals("feed", StringComparison.OrdinalIgnoreCase);
+        XElement? channel = isAtom ? root : null;
+
+        if (!isAtom)
+        {
+            foreach (var el in root.Elements())
+            {
+                if (el.Name.LocalName.Equals("channel", StringComparison.OrdinalIgnoreCase))
+                {
+                    channel = el;
+                    break;
+                }
+            }
+        }
+
+        if (channel == null) return;
+
+        foreach (var el in channel.Elements())
+        {
+            if (el.Name.LocalName.Equals("title", StringComparison.OrdinalIgnoreCase))
+            {
+                feed.Title = string.IsNullOrWhiteSpace(el.Value) ? feed.Title : el.Value.Trim();
+            }
+        }
+
+        foreach (var el in channel.Elements())
+        {
+            var localName = el.Name.LocalName;
+            if (!localName.Equals("item", StringComparison.OrdinalIgnoreCase) &&
+                !localName.Equals("entry", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var itemTitle = "";
+            var itemLink = "";
+            var itemDesc = "";
+            var itemDate = DateTime.UtcNow;
+            string? itemImage = null;
+            string? audioUrl = null;
+            string? duration = null;
+            string? episodeAuthor = null;
+
+            foreach (var child in el.Elements())
+            {
+                var cname = child.Name.LocalName;
+                var cns = child.Name.NamespaceName;
+
+                if (cname.Equals("title", StringComparison.OrdinalIgnoreCase))
+                {
+                    itemTitle = child.Value.Trim();
+                }
+                else if (cname.Equals("link", StringComparison.OrdinalIgnoreCase))
+                {
+                    var href = child.Attribute("href")?.Value ?? child.Value.Trim();
+                    if (!string.IsNullOrWhiteSpace(href))
+                    {
+                        var rel = child.Attribute("rel")?.Value ?? "";
+                        if (!rel.Equals("enclosure", StringComparison.OrdinalIgnoreCase))
+                            itemLink = href;
+                    }
+                }
+                else if (cname.Equals("description", StringComparison.OrdinalIgnoreCase) ||
+                         cname.Equals("summary", StringComparison.OrdinalIgnoreCase) ||
+                         cname.Equals("content", StringComparison.OrdinalIgnoreCase) ||
+                         (cname.Equals("encoded", StringComparison.OrdinalIgnoreCase) &&
+                          cns.Contains("content", StringComparison.OrdinalIgnoreCase)))
+                {
+                    if (string.IsNullOrWhiteSpace(itemDesc) || child.Value.Trim().Length > itemDesc.Length)
+                        itemDesc = child.Value.Trim();
+                }
+                else if (cname.Equals("pubDate", StringComparison.OrdinalIgnoreCase) ||
+                         cname.Equals("published", StringComparison.OrdinalIgnoreCase) ||
+                         cname.Equals("updated", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (DateTime.TryParse(child.Value, out var dt))
+                        itemDate = dt;
+                }
+                else if (cname.Equals("enclosure", StringComparison.OrdinalIgnoreCase))
+                {
+                    var encUrl = child.Attribute("url")?.Value?.Trim();
+                    var encType = child.Attribute("type")?.Value ?? "";
+                    if (!string.IsNullOrWhiteSpace(encUrl) && Uri.TryCreate(encUrl, UriKind.Absolute, out _))
+                    {
+                        if (encType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
+                            audioUrl = encUrl;
+                        else if (encType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                            itemImage = encUrl;
+                    }
+                }
+                else if (cname.Equals("duration", StringComparison.OrdinalIgnoreCase) &&
+                         cns.Contains("itunes", StringComparison.OrdinalIgnoreCase))
+                {
+                    duration = child.Value.Trim();
+                }
+                else if (cname.Equals("author", StringComparison.OrdinalIgnoreCase) &&
+                         cns.Contains("itunes", StringComparison.OrdinalIgnoreCase))
+                {
+                    episodeAuthor = child.Value.Trim();
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(itemTitle) && string.IsNullOrWhiteSpace(itemLink))
+                continue;
+
+            if (string.IsNullOrWhiteSpace(itemLink) && !string.IsNullOrWhiteSpace(audioUrl))
+                itemLink = audioUrl;
+
+            if (itemImage == null)
+                itemImage = ExtractFromImgTags(itemDesc, itemLink);
+
+            var article = new Article
+            {
+                FeedId      = feed.Id,
+                FeedTitle   = feed.Title,
+                Title       = string.IsNullOrWhiteSpace(itemTitle) ? "(No title)" : itemTitle,
+                Url         = itemLink,
+                Description = StripHtml(itemDesc),
+                ImageUrl    = itemImage,
+                PublishedAt = itemDate,
+                AudioUrl    = audioUrl,
+                Duration    = duration,
+                EpisodeAuthor = episodeAuthor
+            };
+
+            data.Articles.Add(article);
+        }
     }
 
     private static void ExtractPodcastFeedMetadata(Feed feed, CodeHollow.FeedReader.Feed parsedFeed)
