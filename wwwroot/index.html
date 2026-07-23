@@ -602,15 +602,12 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      transition: transform 300ms ease, opacity 400ms ease;
+      transition: transform 300ms ease;
       z-index: 1;
-      opacity: 0;
     }
 
-    .article-media img[src] { opacity: 1; }
-
     .article-card:hover .article-media img { transform: scale(1.035); }
-    .article-media.image-failed img { display: none; opacity: 0; }
+    .article-media.image-failed img { display: none; }
 
     .media-fallback {
       display: grid;
@@ -1069,8 +1066,6 @@
     .article-card.article-rtl .read-link { direction: rtl; }
     .article-card.article-rtl .article-actions { direction: rtl; }
 
-    .article-card.article-rtl.article-card:not(.article-rtl) .article-desc { direction: ltr; text-align: left; }
-
     [dir="rtl"] .app,
     [dir="rtl"] .brand-mark,
     [dir="rtl"] .topbar,
@@ -1092,11 +1087,6 @@
     @keyframes riseIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
     }
 
     .articles-scroll::-webkit-scrollbar { width: 6px; }
@@ -1762,6 +1752,8 @@
 
     let feedsCache = [];
     let articlesCache = [];
+    let feedColorMap = {};
+    let feedArticleCounts = {};
     let selectedFeedId = null;
     let searchQuery = '';
     let searchTimer = null;
@@ -1929,11 +1921,10 @@
     }
 
     async function loadFeeds() {
-      feedList.innerHTML = `<div class="empty-mini">${t('loadingFeeds')}</div>`;
-
       try {
         const res = await fetch(`${API_BASE}/api/feeds`);
         feedsCache = await res.json();
+        rebuildCaches();
         updateStats();
 
         if (!feedsCache.length) {
@@ -1961,7 +1952,7 @@
       try {
         const res = await fetch(`${API_BASE}/api/articles`);
         articlesCache = await res.json();
-        updateStats();
+        rebuildCaches();
       } catch {
         articlesContainer.innerHTML = renderState('◇', t('articleLoadErrorTitle'), t('articleLoadErrorMessage'));
       }
@@ -2055,10 +2046,12 @@
 
       if (contentType) {
         const typeVal = contentType === 'News' ? 1 : contentType === 'Podcast' ? 2 : 0;
-        const typeFeeds = feedsCache
-          .filter(f => f.feedType === typeVal || (contentType === 'News' && f.feedType === 0))
-          .map(f => f.id);
-        articles = articles.filter(a => typeFeeds.includes(a.feedId));
+        const typeFeeds = new Set();
+        for (const f of feedsCache) {
+          if (f.feedType === typeVal || (contentType === 'News' && f.feedType === 0))
+            typeFeeds.add(f.id);
+        }
+        articles = articles.filter(a => typeFeeds.has(a.feedId));
       }
 
       if (searchQuery) {
@@ -2176,8 +2169,8 @@
     }
 
     function renderFeed(feed, index) {
-      const color = DOT_COLORS[index % DOT_COLORS.length];
-      const count = articlesCache.filter(a => a.feedId === feed.id).length;
+      const color = feedColorMap[feed.id] || DOT_COLORS[index % DOT_COLORS.length];
+      const count = feedArticleCounts[feed.id] || 0;
       const title = escHtml(feed.title);
       const selected = feed.id === selectedFeedId ? ' selected' : '';
 
@@ -2221,19 +2214,23 @@
     function renderArticle(article, index) {
       const color = getFeedColor(article.feedId);
       const featured = index === 0;
-      const rtl = isRtl(`${article.title} ${article.description}`);
-      const titleHtml = highlightText(article.title || '', searchQuery);
-      const descHtml = highlightText(article.description || t('noDescription'), searchQuery);
+      const rtl = isRtl(article.title) || isRtl(article.description);
+      const sq = searchQuery;
+      const titleText = article.title || '';
+      const descText = article.description || t('noDescription');
+      const titleHtml = sq ? highlightText(titleText, sq) : escHtml(titleText);
+      const descHtml = sq ? highlightText(descText, sq) : escHtml(descText);
       const url = escAttr(article.url || '#');
       const feedTitle = escHtml(article.feedTitle || '');
       const imageUrl = article.imageUrl ? escAttr(article.imageUrl) : '';
       const cardClass = `article-card ${featured ? 'featured' : ''} ${rtl ? 'article-rtl' : ''}`;
       const arrow = locale === 'ar' || rtl ? '←' : '→';
-      const shareTitle = escAttr(article.title || '');
       const readTime = getReadingTime(article.description);
+      const favClass = favoritedUrls.has(article.url || '') ? ' favorited' : '';
+      const favIcon = favClass ? '♥' : '♡';
 
       return `
-        <article class="${cardClass}" style="--feed-color:${color}" dir="${rtl ? 'rtl' : 'auto'}" tabindex="0" role="article" aria-label="${escAttr(article.title || '')}">
+        <article class="${cardClass}" style="--feed-color:${color}" dir="${rtl ? 'rtl' : 'auto'}" tabindex="0" role="article" aria-label="${escAttr(titleText)}">
           ${renderMedia(imageUrl, article.title, article.feedTitle)}
           <div class="article-body">
             <div class="article-meta">
@@ -2249,8 +2246,8 @@
             <div class="article-actions">
               <a class="read-link" href="${url}" target="_blank" rel="noopener noreferrer">${t('readArticle')} <span aria-hidden="true">${arrow}</span></a>
               <div class="article-actions-right">
-                <button class="favorite-btn${favoritedUrls.has(article.url || '') ? ' favorited' : ''}" type="button" data-url="${url}" title="${t('favorite')}" aria-label="${t('favorite')}">${favoritedUrls.has(article.url || '') ? '♥' : '♡'}</button>
-                <button class="article-action-btn" type="button" title="${t('shareArticle')}" onclick="shareArticle(event, '${url}', '${shareTitle}')" aria-label="${t('shareArticle')}">↗</button>
+                <button class="favorite-btn${favClass}" type="button" data-url="${url}" title="${t('favorite')}" aria-label="${t('favorite')}">${favIcon}</button>
+                <button class="article-action-btn" type="button" title="${t('shareArticle')}" onclick="shareArticle(event, '${url}', '${escAttr(titleText)}')" aria-label="${t('shareArticle')}">↗</button>
                 <button class="article-action-btn" type="button" title="${t('copyLink')}" onclick="copyArticleLink(event, '${url}')" aria-label="${t('copyLink')}">⧉</button>
               </div>
             </div>
@@ -2403,9 +2400,19 @@
       document.getElementById('feedCount').textContent = feedsCache.length;
     }
 
+    function rebuildCaches() {
+      feedColorMap = {};
+      feedArticleCounts = {};
+      feedsCache.forEach((feed, idx) => {
+        feedColorMap[feed.id] = DOT_COLORS[idx % DOT_COLORS.length];
+      });
+      for (const a of articlesCache) {
+        feedArticleCounts[a.feedId] = (feedArticleCounts[a.feedId] || 0) + 1;
+      }
+    }
+
     function getFeedColor(feedId) {
-      const idx = feedsCache.findIndex(feed => feed.id === feedId);
-      return idx === -1 ? '#667085' : DOT_COLORS[idx % DOT_COLORS.length];
+      return feedColorMap[feedId] || '#667085';
     }
 
     function formatDate(dateStr) {
@@ -2427,10 +2434,6 @@
         day: 'numeric',
         year: 'numeric'
       });
-    }
-
-    function timeAgo(dateStr) {
-      return formatDate(dateStr);
     }
 
     function setButtonLoading(button, label) {

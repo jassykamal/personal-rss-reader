@@ -22,6 +22,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<RecentlyViewedArticle>(e =>
         {
             e.HasIndex(r => r.UserId);
+            e.HasIndex(r => new { r.UserId, r.ArticleUrl });
         });
 
         builder.Entity<ReadingHistory>(e =>

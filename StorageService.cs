@@ -37,18 +37,35 @@ public class StorageService
         }
         catch
         {
-            // If the file is somehow corrupted, start fresh
             return new AppData();
         }
     }
 
-    // ── SAVE ──────────────────────────────────────────────────
-    // Converts the app data to JSON and writes it to the file.
-    // Every time something changes (add feed, delete feed, refresh),
-    // we call this to make sure nothing is lost.
+    public async Task<AppData> LoadAsync()
+    {
+        if (!File.Exists(_filePath))
+            return new AppData();
+
+        try
+        {
+            var json = await File.ReadAllTextAsync(_filePath);
+            return JsonSerializer.Deserialize<AppData>(json, _options) ?? new AppData();
+        }
+        catch
+        {
+            return new AppData();
+        }
+    }
+
     public void Save(AppData data)
     {
         var json = JsonSerializer.Serialize(data, _options);
         File.WriteAllText(_filePath, json);
+    }
+
+    public async Task SaveAsync(AppData data)
+    {
+        var json = JsonSerializer.Serialize(data, _options);
+        await File.WriteAllTextAsync(_filePath, json);
     }
 }

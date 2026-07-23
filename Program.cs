@@ -69,7 +69,8 @@ static void MigrateDatabase(AppDbContext db)
     {
         "ALTER TABLE FavoriteArticles ADD COLUMN ContentType TEXT NULL",
         "ALTER TABLE RecentlyViewedArticles ADD COLUMN ContentType TEXT NULL",
-        "ALTER TABLE ReadingHistories ADD COLUMN ContentType TEXT NULL"
+        "ALTER TABLE ReadingHistories ADD COLUMN ContentType TEXT NULL",
+        "CREATE INDEX IF NOT EXISTS IX_RecentlyViewedArticles_UserId_ArticleUrl ON RecentlyViewedArticles (UserId, ArticleUrl)"
     };
 
     foreach (var sql in migrations)
@@ -102,11 +103,9 @@ app.MapPost("/api/feeds", async (AddFeedRequest request, StorageService storage,
         !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         return Results.BadRequest(new { error = "URL must start with http:// or https://" });
 
-    var title = await feedService.ValidateFeedAsync(url);
+    var (title, feedType) = await feedService.ValidateAndDetectAsync(url);
     if (title == null)
         return Results.BadRequest(new { error = "Could not read this URL as an RSS/Atom feed." });
-
-    var feedType = await feedService.DetectFeedTypeAsync(url);
 
     var data = storage.Load();
 

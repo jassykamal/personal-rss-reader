@@ -11,6 +11,12 @@ public class FeedService
     private static readonly XNamespace PodcastNs = "https://podcastindex.org/namespace/1.0";
     private static readonly XNamespace AtomNs = "http://www.w3.org/2005/Atom";
 
+    private static readonly Regex StripHtmlRegex = new("<[^>]*>", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex ImgSrcRegex = new(
+        "<img[^>]+src=[\"'](?<src>[^\"']+)[\"']",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
     private readonly StorageService _storage;
     private readonly HttpClient _httpClient;
 
@@ -20,6 +26,15 @@ public class FeedService
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "RssReader/1.0");
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml, */*");
+    }
+
+    public async Task<(string? Title, FeedType Type)> ValidateAndDetectAsync(string url)
+    {
+        var title = await ValidateFeedAsync(url);
+        if (title == null) return (null, FeedType.Unspecified);
+
+        var type = await DetectFeedTypeAsync(url);
+        return (title, type);
     }
 
     public async Task<string?> ValidateFeedAsync(string url)
@@ -197,6 +212,7 @@ public class FeedService
         }
 
         var data = _storage.Load();
+
         var feedType = await DetectFeedTypeAsync(feed.Url);
 
         var storedFeed = data.Feeds.FirstOrDefault(f => f.Id == feed.Id);
@@ -231,7 +247,7 @@ public class FeedService
         data.Articles.RemoveAll(a => a.FeedId == feed.Id);
         data.Articles.AddRange(newArticles);
 
-        _storage.Save(data);
+        await _storage.SaveAsync(data);
     }
 
     private void PopulateArticlesFromFeedReader(
@@ -548,9 +564,9 @@ public class FeedService
         if (string.IsNullOrWhiteSpace(html))
             return string.Empty;
 
-        var noTags = Regex.Replace(html, "<[^>]*>", " ");
+        var noTags = StripHtmlRegex.Replace(html, " ");
         var decoded = System.Net.WebUtility.HtmlDecode(noTags);
-        var clean = Regex.Replace(decoded, @"\s+", " ").Trim();
+        var clean = WhitespaceRegex.Replace(decoded, " ").Trim();
 
         return clean;
     }
@@ -568,10 +584,7 @@ public class FeedService
         if (string.IsNullOrWhiteSpace(html))
             return null;
 
-        var matches = Regex.Matches(
-            html,
-            "<img[^>]+src=[\"'](?<src>[^\"']+)[\"']",
-            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        var matches = ImgSrcRegex.Matches(html);
 
         foreach (Match match in matches)
         {
