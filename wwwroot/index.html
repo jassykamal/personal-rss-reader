@@ -1223,6 +1223,39 @@
     .podcast-play-btn.playing { background: var(--accent); }
     .podcast-play-btn .btn-icon { font-size: 0.9rem; }
 
+    /* ── AI Summary ─────────────────────────────────────────── */
+    .ai-summary-btn {
+      display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px;
+      border: 1px solid var(--line); border-radius: 6px; background: var(--soft);
+      color: var(--muted); font-size: 0.8rem; font-weight: 650; cursor: pointer;
+      transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+    }
+    .ai-summary-btn:hover { background: var(--brand-soft); color: var(--brand-hover); border-color: rgba(13,148,136,0.34); }
+    .ai-summary-btn.loading { opacity: 0.7; cursor: wait; }
+    .ai-summary-btn .ai-spinner {
+      width: 12px; height: 12px; border: 2px solid var(--line); border-top-color: var(--brand);
+      border-radius: 50%; animation: spin 600ms linear infinite; display: none;
+    }
+    .ai-summary-btn.loading .ai-spinner { display: inline-block; }
+    .ai-summary-btn .ai-icon { font-size: 0.9rem; }
+    .ai-summary-content {
+      max-height: 0; overflow: hidden; transition: max-height 350ms ease, padding 350ms ease, margin 350ms ease;
+      padding: 0 14px; margin: 0; border-left: 3px solid var(--brand);
+      background: var(--soft); border-radius: 0 6px 6px 0; font-size: 0.86rem;
+      line-height: 1.65; color: var(--muted);
+    }
+    .ai-summary-content.expanded {
+      max-height: 600px; padding: 12px 14px; margin: 4px 0;
+    }
+    .ai-summary-error {
+      color: var(--danger); font-size: 0.82rem; padding: 8px 14px;
+      background: rgba(225,29,72,0.06); border-radius: 6px; margin: 4px 0;
+    }
+    .ai-summary-error .ai-retry {
+      color: var(--brand); cursor: pointer; text-decoration: underline; margin-left: 6px;
+      background: none; border: 0; font: inherit; padding: 0;
+    }
+
     /* ── Audio Player Bar ───────────────────────────────────── */
     .audio-player {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
@@ -1648,6 +1681,8 @@
         noFavoritesMessage: 'Click the ♡ button on any article to save it here.',
         noRecent: 'No recently viewed',
         noRecentMessage: 'Articles you read will appear here.',
+        aiSummaryError: 'Could not load summary.',
+        aiRetry: 'Retry',
         noNewsFeeds: 'No news feeds yet',
         noNewsFeedsMsg: 'Add an RSS or Atom news feed to see articles here.',
         noPodcastFeeds: 'No podcast feeds yet',
@@ -1743,6 +1778,8 @@
         noFavoritesMessage: 'انقر على زر ♡ في أي مقال لحفظه هنا.',
         noRecent: 'لا توجد مقالات مشاهد',
         noRecentMessage: 'المقالات التي تقرأها ستظهر هنا.',
+        aiSummaryError: 'تعذر تحميل الملخص.',
+        aiRetry: 'إعادة المحاولة',
         noNewsFeeds: 'لا توجد مصادر أخبار',
         noNewsFeedsMsg: 'أضف مصدر أخبار RSS أو Atom لرؤية المقالات هنا.',
         noPodcastFeeds: 'لا توجد مصادر بودكاست',
@@ -1847,6 +1884,12 @@
             recordArticleView(url, dashCard);
             window.open(url, '_blank');
           }
+        }
+
+        const aiBtn = event.target.closest('.ai-summary-btn');
+        if (aiBtn) {
+          event.preventDefault();
+          toggleAISummary(aiBtn);
         }
       });
 
@@ -2246,11 +2289,13 @@
             <div class="article-actions">
               <a class="read-link" href="${url}" target="_blank" rel="noopener noreferrer">${t('readArticle')} <span aria-hidden="true">${arrow}</span></a>
               <div class="article-actions-right">
+                <button class="ai-summary-btn" type="button" data-url="${url}" data-title="${escAttr(titleText)}" data-description="${escAttr(descText)}" data-feed="${escAttr(feedTitle)}" data-type="News" aria-label="AI Summary">🤖</button>
                 <button class="favorite-btn${favClass}" type="button" data-url="${url}" title="${t('favorite')}" aria-label="${t('favorite')}">${favIcon}</button>
                 <button class="article-action-btn" type="button" title="${t('shareArticle')}" onclick="shareArticle(event, '${url}', '${escAttr(titleText)}')" aria-label="${t('shareArticle')}">↗</button>
                 <button class="article-action-btn" type="button" title="${t('copyLink')}" onclick="copyArticleLink(event, '${url}')" aria-label="${t('copyLink')}">⧉</button>
               </div>
             </div>
+            <div class="ai-summary-content"></div>
           </div>
         </article>
       `;
@@ -2300,10 +2345,12 @@
                 <span class="btn-icon">${isPlaying ? '⏸' : '▶'}</span> ${isPlaying ? t('pauseEpisode') : t('playEpisode')}
               </button>
               ` : ''}
+              <button class="ai-summary-btn" type="button" data-url="${url}" data-title="${escAttr(episode.title || '')}" data-description="${escAttr(episode.description || '')}" data-feed="${escAttr(feedTitle)}" data-type="Podcast" aria-label="AI Summary">🤖</button>
               <button class="favorite-btn${favClass}" type="button" data-url="${url}" title="${t('favorite')}" aria-label="${t('favorite')}">${favClass ? '♥' : '♡'}</button>
               <button class="article-action-btn" type="button" title="${t('shareArticle')}" onclick="shareArticle(event, '${url}', '${shareTitle}')" aria-label="${t('shareArticle')}">↗</button>
               <button class="article-action-btn" type="button" title="${t('copyLink')}" onclick="copyArticleLink(event, '${url}')" aria-label="${t('copyLink')}">⧉</button>
             </div>
+            <div class="ai-summary-content"></div>
           </div>
         </article>
       `;
@@ -2943,6 +2990,71 @@
       document.getElementById('playerTotal').textContent = '0:00';
       document.getElementById('playerSeek').value = 0;
       updatePlayButtons(null);
+    }
+
+    // ── AI Summary ──────────────────────────────────────────────
+
+    const summaryCache = {};
+
+    async function toggleAISummary(btn) {
+      const card = btn.closest('.article-card') || btn.closest('.podcast-card');
+      const container = card?.querySelector('.ai-summary-content');
+      if (!container) return;
+
+      if (container.classList.contains('expanded')) {
+        container.classList.remove('expanded');
+        return;
+      }
+
+      const url = btn.dataset.url;
+      if (!url) return;
+
+      if (summaryCache[url]) {
+        container.innerHTML = summaryCache[url];
+        container.classList.add('expanded');
+        return;
+      }
+
+      btn.classList.add('loading');
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<span class="ai-spinner"></span>';
+
+      try {
+        const res = await fetch('/api/ai/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            articleUrl: url,
+            title: btn.dataset.title || '',
+            description: btn.dataset.description || '',
+            feedTitle: btn.dataset.feed || '',
+            contentType: btn.dataset.type || 'News'
+          })
+        });
+
+        if (!res.ok) throw new Error('Failed');
+
+        const data = await res.json();
+        summaryCache[url] = `<p style="margin:0;white-space:pre-wrap">${escHtml(data.summary)}</p>`;
+        container.innerHTML = summaryCache[url];
+        container.classList.add('expanded');
+      } catch {
+        container.innerHTML = `<div class="ai-summary-error">${t('aiSummaryError')}<button class="ai-retry" onclick="retryAISummary(this)" data-url="${escAttr(url)}">${t('aiRetry')}</button></div>`;
+        container.classList.add('expanded');
+      } finally {
+        btn.classList.remove('loading');
+        btn.innerHTML = originalHtml;
+      }
+    }
+
+    function retryAISummary(retryBtn) {
+      const url = retryBtn.dataset.url;
+      const container = retryBtn.closest('.ai-summary-content');
+      if (container) container.classList.remove('expanded');
+      delete summaryCache[url];
+      const card = retryBtn.closest('.article-card') || retryBtn.closest('.podcast-card');
+      const btn = card?.querySelector('.ai-summary-btn');
+      if (btn) toggleAISummary(btn);
     }
 
     function formatTime(seconds) {

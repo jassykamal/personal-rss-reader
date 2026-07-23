@@ -7,6 +7,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<FavoriteArticle> FavoriteArticles => Set<FavoriteArticle>();
     public DbSet<RecentlyViewedArticle> RecentlyViewedArticles => Set<RecentlyViewedArticle>();
     public DbSet<ReadingHistory> ReadingHistories => Set<ReadingHistory>();
+    public DbSet<ArticleSummary> ArticleSummaries => Set<ArticleSummary>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -28,6 +29,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ReadingHistory>(e =>
         {
             e.HasIndex(r => r.UserId);
+        });
+
+        builder.Entity<ArticleSummary>(e =>
+        {
+            e.HasIndex(s => s.ArticleUrl).IsUnique();
         });
     }
 }

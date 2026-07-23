@@ -164,3 +164,20 @@ public class AddFeedRequest
 {
     public string Url { get; set; } = string.Empty;
 }
+
+public class ArticleSummary
+{
+    public int Id { get; set; }
+    public string ArticleUrl { get; set; } = string.Empty;
+    public string Summary { get; set; } = string.Empty;
+    public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class SummarizeRequest
+{
+    public string ArticleUrl { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string FeedTitle { get; set; } = string.Empty;
+    public string? ContentType { get; set; }
+}
