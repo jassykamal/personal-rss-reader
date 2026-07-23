@@ -212,6 +212,15 @@ public class FeedService
         {
             if (storedFeed != null)
                 storedFeed.Title = parsedFeed.Title ?? storedFeed.Title;
+            if (feedType == FeedType.Podcast)
+            {
+                ExtractPodcastFeedMetadata(feed, parsedFeed);
+                if (storedFeed != null)
+                {
+                    storedFeed.Author = feed.Author;
+                    storedFeed.ArtworkUrl = feed.ArtworkUrl;
+                }
+            }
             PopulateArticlesFromFeedReader(feed, parsedFeed, newArticles, feedType);
         }
         else

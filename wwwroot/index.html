@@ -1180,7 +1180,7 @@
     /* ── Podcast card ───────────────────────────────────────── */
     .podcast-card {
       display: flex; gap: 18px; background: var(--panel); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-soft);
+      border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-soft); min-width: 0;
       animation: riseIn 280ms ease both; transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
     }
     .podcast-card:hover { transform: translateY(-2px); border-color: rgba(13,148,136,0.28); box-shadow: var(--shadow); }
@@ -1298,7 +1298,10 @@
     .audio-player-close:hover { background: var(--line); color: var(--text); }
 
     /* ── Podcast list ───────────────────────────────────────── */
-    .podcast-list { display: grid; gap: 10px; }
+    .podcast-list {
+      display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px;
+      max-width: 1180px; margin: 0 auto;
+    }
     .podcast-list .article-card { display: none; }
 
     /* ── Feed section header ────────────────────────────────── */
@@ -1333,18 +1336,22 @@
       .dash-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
       .dash-stat-card { padding: 14px 12px; }
       .dash-stat-value { font-size: 1.5rem; }
-      .podcast-card { flex-direction: row; align-items: flex-start; text-align: left; }
-      .podcast-artwork { width: 84px; height: 84px; flex: 0 0 84px; }
-      .podcast-info { align-items: flex-start; }
+      .podcast-card { flex-direction: column; align-items: stretch; text-align: left; padding: 14px; gap: 12px; }
+      .podcast-artwork { width: 100%; height: auto; aspect-ratio: 1 / 1; max-width: 200px; align-self: center; flex: 0 0 auto; border-radius: 8px; }
+      .podcast-info { align-items: stretch; min-width: 0; }
       .podcast-actions { justify-content: flex-start; }
+      .podcast-play-btn { padding: 8px 16px; }
     }
 
     @media (max-width: 480px) {
       .dash-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
       .dash-stat-value { font-size: 1.3rem; }
       .dash-stat-label { font-size: 0.7rem; }
-      .podcast-artwork { width: 72px; height: 72px; flex: 0 0 72px; }
       .podcast-card { padding: 12px; gap: 10px; }
+      .podcast-artwork { max-width: 160px; }
+      .podcast-title { font-size: 0.95rem; }
+      .podcast-desc { font-size: 0.82rem; }
+      .podcast-meta { font-size: 0.76rem; }
     }
 
     @media (max-width: 980px) {
@@ -1530,7 +1537,11 @@
         <div class="audio-player-feed" id="playerFeed">-</div>
       </div>
       <div class="audio-player-controls">
+        <button class="audio-player-btn" id="playerPrevBtn" type="button" aria-label="Previous episode" title="Previous">⏮</button>
+        <button class="audio-player-btn" id="playerSkipBackBtn" type="button" aria-label="Skip back 15 seconds" title="Back 15s">↺</button>
         <button class="audio-player-btn play-btn" id="playerPlayBtn" type="button" aria-label="Play">▶</button>
+        <button class="audio-player-btn" id="playerSkipFwdBtn" type="button" aria-label="Skip forward 30 seconds" title="Forward 30s">↻</button>
+        <button class="audio-player-btn" id="playerNextBtn" type="button" aria-label="Next episode" title="Next">⏭</button>
         <div class="audio-player-progress">
           <span class="audio-player-time" id="playerCurrent">0:00</span>
           <input type="range" class="audio-player-seek" id="playerSeek" min="0" max="100" value="0" step="0.1" aria-label="Seek" />
@@ -1905,10 +1916,7 @@
           showToast(t('subscribedTo', { title: data.title }), 'success');
           await loadFeeds();
           await loadArticles();
-          if (currentView === 'news') renderFilteredArticles('News');
-          else if (currentView === 'podcasts') renderFilteredArticles('Podcast');
-          else if (currentView === 'favorites' || currentView === 'recent') switchView(currentView);
-          else if (currentView === 'home') renderDashboard();
+          renderCurrentView();
         } else {
           setStatus(data.error || t('feedLoadError'), 'error');
         }
@@ -2134,11 +2142,7 @@
           showToast(data.message, 'success');
           await loadFeeds();
           await loadArticles();
-          console.log('[REFRESH] currentView after reload:', currentView);
-          if (currentView === 'news') renderFilteredArticles('News');
-          else if (currentView === 'podcasts') renderFilteredArticles('Podcast');
-          else if (currentView === 'favorites' || currentView === 'recent') switchView(currentView);
-          else if (currentView === 'home') renderDashboard();
+          renderCurrentView();
         } else {
           showToast(data.error || t('refreshFailed'), 'error');
         }
@@ -2162,10 +2166,7 @@
           showToast(data.message, 'success');
           await loadFeeds();
           await loadArticles();
-          if (currentView === 'news') renderFilteredArticles('News');
-          else if (currentView === 'podcasts') renderFilteredArticles('Podcast');
-          else if (currentView === 'favorites' || currentView === 'recent') switchView(currentView);
-          else if (currentView === 'home') renderDashboard();
+          renderCurrentView();
         } else {
           showToast(data.error || t('removeFailed'), 'error');
         }
@@ -2638,15 +2639,7 @@
     }
 
     async function recordArticleView(url, card) {
-      console.log('[RECORD-VIEW] Called with URL:', url, 'card:', card?.className);
-      if (!isAuthenticated) {
-        console.log('[RECORD-VIEW] Not authenticated, returning');
-        return;
-      }
-      if (!url) {
-        console.log('[RECORD-VIEW] No URL, returning');
-        return;
-      }
+      if (!isAuthenticated || !url) return;
       const isPodcast = !!card?.closest('.podcast-card') || card?.classList?.contains('podcast-card');
       const titleEl = card?.querySelector('.article-title, .podcast-title a, .dash-card-title');
       const feedEl = card?.querySelector('.article-meta span, .podcast-meta span, .dash-card-meta');
@@ -2655,16 +2648,11 @@
       const feedTitle = feedEl?.textContent || '';
       const imageUrl = img?.src || '';
       const contentType = isPodcast ? 'Podcast' : 'News';
-      console.log('[RECORD-VIEW] Extracted:', { title, feedTitle, imageUrl, contentType });
       const body = JSON.stringify({ articleUrl: url, articleTitle: title, feedTitle, imageUrl, contentType });
       try {
-        const rvRes = await fetch('/api/recently-viewed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-        console.log('[RECORD-VIEW] POST recently-viewed status:', rvRes.status);
-        const hsRes = await fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-        console.log('[RECORD-VIEW] POST history status:', hsRes.status);
-      } catch (e) {
-        console.log('[RECORD-VIEW] Fetch error:', e);
-      }
+        await fetch('/api/recently-viewed', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+        await fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+      } catch { /* ignore */ }
     }
 
     async function switchView(view) {
@@ -2718,12 +2706,9 @@
 
         try {
           const endpoint = view === 'favorites' ? '/api/favorites' : '/api/recently-viewed';
-          console.log('[SWITCH-VIEW] Fetching:', endpoint);
           const res = await fetch(endpoint);
-          console.log('[SWITCH-VIEW] Response status:', res.status);
           if (!res.ok) throw new Error('Failed');
           const items = await res.json();
-          console.log('[SWITCH-VIEW] Items count:', items.length, 'first item:', items[0]);
 
           if (!items.length) {
             articlesContainer.innerHTML = renderState('◇',
@@ -2783,7 +2768,7 @@
     // ── Audio Player ───────────────────────────────────────────
 
     window._currentAudioUrl = null;
-    window._currentAudioElement = null;
+    window._episodeList = [];
 
     function initAudioPlayer() {
       const audio = document.getElementById('audioElement');
@@ -2793,7 +2778,6 @@
       const volumeBtn = document.getElementById('playerVolumeBtn');
       const speedBtn = document.getElementById('playerSpeedBtn');
       const closeBtn = document.getElementById('playerCloseBtn');
-      const player = document.getElementById('audioPlayer');
       const currentTime = document.getElementById('playerCurrent');
       const totalTime = document.getElementById('playerTotal');
 
@@ -2801,9 +2785,9 @@
         if (audio.paused) audio.play(); else audio.pause();
       });
 
-      audio.addEventListener('play', () => { playBtn.textContent = '⏸'; });
-      audio.addEventListener('pause', () => { playBtn.textContent = '▶'; });
-      audio.addEventListener('ended', () => { playBtn.textContent = '▶'; closePlayer(); });
+      audio.addEventListener('play', () => { playBtn.textContent = '⏸'; updatePlayButtons(window._currentAudioUrl); });
+      audio.addEventListener('pause', () => { playBtn.textContent = '▶'; updatePlayButtons(null); });
+      audio.addEventListener('ended', () => { playBtn.textContent = '▶'; playNextEpisode(); });
 
       audio.addEventListener('timeupdate', () => {
         currentTime.textContent = formatTime(audio.currentTime);
@@ -2843,7 +2827,62 @@
         speedBtn.textContent = next + 'x';
       });
 
+      document.getElementById('playerSkipBackBtn').addEventListener('click', () => {
+        audio.currentTime = Math.max(0, audio.currentTime - 15);
+      });
+
+      document.getElementById('playerSkipFwdBtn').addEventListener('click', () => {
+        audio.currentTime = Math.min(audio.duration || Infinity, audio.currentTime + 30);
+      });
+
+      document.getElementById('playerPrevBtn').addEventListener('click', playPreviousEpisode);
+      document.getElementById('playerNextBtn').addEventListener('click', playNextEpisode);
+
       closeBtn.addEventListener('click', closePlayer);
+    }
+
+    function collectEpisodeList() {
+      const buttons = document.querySelectorAll('.podcast-play-btn[data-audio-url]');
+      window._episodeList = Array.from(buttons).map(btn => ({
+        audioUrl: btn.dataset.audioUrl,
+        title: btn.dataset.title || '',
+        feedTitle: btn.dataset.feedTitle || '',
+        imageUrl: btn.dataset.imageUrl || '',
+        episodeUrl: btn.dataset.episodeUrl || ''
+      }));
+    }
+
+    function playPreviousEpisode() {
+      if (!window._episodeList.length) collectEpisodeList();
+      const idx = window._episodeList.findIndex(e => e.audioUrl === window._currentAudioUrl);
+      if (idx > 0) {
+        const ep = window._episodeList[idx - 1];
+        startEpisode(ep.audioUrl, ep.title, ep.feedTitle, ep.imageUrl, ep.episodeUrl);
+      }
+    }
+
+    function playNextEpisode() {
+      if (!window._episodeList.length) collectEpisodeList();
+      const idx = window._episodeList.findIndex(e => e.audioUrl === window._currentAudioUrl);
+      if (idx >= 0 && idx < window._episodeList.length - 1) {
+        const ep = window._episodeList[idx + 1];
+        startEpisode(ep.audioUrl, ep.title, ep.feedTitle, ep.imageUrl, ep.episodeUrl);
+      } else {
+        closePlayer();
+      }
+    }
+
+    function startEpisode(audioUrl, title, feedTitle, imageUrl, episodeUrl) {
+      const audio = document.getElementById('audioElement');
+      window._currentAudioUrl = audioUrl;
+      audio.src = audioUrl;
+      audio.load();
+      updatePlayerInfo(title, feedTitle, imageUrl);
+      audio.play().catch(() => {
+        showToast('Could not play this episode.', 'error');
+      });
+      document.getElementById('audioPlayer').classList.add('visible');
+      updatePlayButtons(audioUrl);
     }
 
     function toggleAudioPlayback(audioUrl, title, feedTitle, imageUrl, episodeUrl, button) {
@@ -2852,23 +2891,19 @@
 
       if (window._currentAudioUrl === audioUrl && !audio.paused) {
         audio.pause();
-        updatePlayButtons(null);
         return;
       }
 
       if (window._currentAudioUrl !== audioUrl) {
-        window._currentAudioUrl = audioUrl;
-        window._currentAudioElement = audio;
-        audio.src = audioUrl;
-        audio.load();
-        updatePlayerInfo(title, feedTitle, imageUrl);
+        collectEpisodeList();
+        startEpisode(audioUrl, title, feedTitle, imageUrl, episodeUrl);
+      } else {
+        audio.play().catch(() => {
+          showToast('Could not play this episode.', 'error');
+        });
+        player.classList.add('visible');
+        updatePlayButtons(audioUrl);
       }
-
-      audio.play().catch(() => {
-        showToast('Could not play this episode.', 'error');
-      });
-      player.classList.add('visible');
-      updatePlayButtons(audioUrl);
     }
 
     function updatePlayerInfo(title, feedTitle, imageUrl) {
@@ -2889,14 +2924,6 @@
         btn.classList.toggle('playing', isActive);
         const icon = btn.querySelector('.btn-icon');
         if (icon) icon.textContent = isActive ? '⏸' : '▶';
-        const isThisPlaying = isActive && !document.getElementById('audioElement').paused;
-        btn.innerHTML = btn.innerHTML.replace(
-          isThisPlaying ? t('playEpisode') : t('pauseEpisode'),
-          ''
-        );
-        if (isThisPlaying) {
-          btn.innerHTML = btn.innerHTML.replace(t('playEpisode'), t('pauseEpisode'));
-        }
       });
     }
 
@@ -2905,6 +2932,7 @@
       audio.pause();
       audio.src = '';
       window._currentAudioUrl = null;
+      window._episodeList = [];
       document.getElementById('audioPlayer').classList.remove('visible');
       document.getElementById('playerEpisode').textContent = '-';
       document.getElementById('playerFeed').textContent = '-';
